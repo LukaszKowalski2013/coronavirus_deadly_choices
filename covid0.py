@@ -66,8 +66,8 @@ def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     excess_deaths_in_K = (excess_deaths/1000).round(0).astype(int)
     return f"{what_if_deaths}K", f"{excess_deaths_in_K}K"
 
-def get_official_covid_deaths_by_country(covid_deaths):
-    covid_deaths = covid_deaths[['location', 'date', 'weekly_cases', 'weekly_deaths']]
+def get_official_covid_deaths_by_country(covid_deaths_df):
+    covid_deaths = covid_deaths_df[['location', 'date', 'weekly_cases', 'weekly_deaths']].copy()
     covid_deaths.weekly_deaths.sum()
     # choose deaths from first week of 2023
     covid_deaths.loc[covid_deaths.date == '2023-01-02', 'weekly_deaths'] = covid_deaths['weekly_deaths'] * (
