@@ -32,6 +32,7 @@ covid2 = pd.read_csv(r'data\output_data\covid2.csv')
 gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
 xy_ranking = pd.read_csv('data\gdf_ranking.csv')
+covid_deaths = pd.read_csv(r"data\output_data\_selected_eu\df_weekly_merged.csv")
 # df_weekly = pd.read_csv(r"E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\df_weekly_merged.csv")
 #
 # x = pd.read_csv(r"E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\my_df_weekly.csv")
@@ -44,7 +45,7 @@ xy_ranking = pd.read_csv('data\gdf_ranking.csv')
 #
 # df_weekly = df_weekly.merge(x, left_on= ['location', 'date'],right_on=['country', 'date'], how='outer')
 # df_weekly.to_csv("E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
-df_weekly = pd.read_csv("data\output_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
+df_weekly = pd.read_csv("data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv")
 # change all values inside google columns to normal text without underscore
 # gdf_ranking = gdf2[['ranking', 'geometry']]
 # gdf_ranking['lat'] = gdf_ranking.geometry.centroid.y
@@ -54,7 +55,7 @@ df_weekly = pd.read_csv("data\output_data\_selected_eu\df_weekly_mine_and_other_
 # gdf_ranking.drop_duplicates(subset=['ranking'], how= 'first', inplace=True)
 # gdf_ranking = gdf_ranking[['ranking', 'lat', 'lon']]
 ############ methods ############:
-
+polices = pd.read_csv("data/output_data/polices.csv")
 
 def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     expected_deaths = covid_df.loc[covid_df['country'] == country, 'expected deaths (2020-2022)'].values[0]
@@ -65,8 +66,7 @@ def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     excess_deaths_in_K = (excess_deaths/1000).round(0).astype(int)
     return f"{what_if_deaths}K", f"{excess_deaths_in_K}K"
 
-def get_official_covid_deaths_by_country():
-    covid_deaths = pd.read_csv(r"data\output_data\eu_countries\df_weekly_merged.csv") #todo take it out of here
+def get_official_covid_deaths_by_country(covid_deaths):
     covid_deaths = covid_deaths[['location', 'date', 'weekly_cases', 'weekly_deaths']]
     covid_deaths.weekly_deaths.sum()
     # choose deaths from first week of 2023
@@ -99,7 +99,7 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
     dfy_above['deaths'] = dfy_above['excess_deaths']
 
     df = pd.concat([dfy_av, dfy_below, dfy_above])
-    official_deaths = get_official_covid_deaths_by_country()
+    official_deaths = get_official_covid_deaths_by_country(covid_deaths)
     df = df.merge(official_deaths, on=['country', 'year'], how='left')
     df['deaths_diff'] = df['deaths'] - df['official Covid deaths']
 
@@ -177,8 +177,8 @@ def create_map(mapbox_style="carto-darkmatter"):
         plot_bgcolor='rgba(1,1,1,1)', title_x=0.5, title_y=0.97,
         font=dict(color="white"),
         coloraxis_colorbar=dict(
-            title="excess deaths <br>in % (2020-2022)",
-            thicknessmode="pixels", thickness=20,
+            title="excess <br>deaths <br>in %",
+            thicknessmode="pixels", thickness=20
         ),
         margin={"r": 20, "t": 20, "l": 20, "b": 20},
     paper_bgcolor='rgba(0,0,0,1)', showlegend=False,
@@ -234,10 +234,12 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     vaccination_columns = ['vacination rate']
     google_columns = ['retail and recreation', 'grocery and pharmacy', 'residential', 'transit stations', 'workplaces']
 
-    fig = make_subplots(rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.042,
+    fig = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.042,
                         subplot_titles=("weekly deaths", "weekly cases",
                                         "vaccination rate (% of total population)",
-                                        "google mobility change (by activity type)"))
+                                        "Government Response Index Average",
+                                        "google mobility change (by activity type)"
+                                        ))
     #hide title 'Subplots'
     fig.update_layout(title_text='')
     for i, column in enumerate(columns_to_plot):
@@ -250,11 +252,15 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.add_annotation(x=df['date'].iloc[100], y=df['excess deaths'].iloc[100], arrowcolor="#a6a6a6",
                             text="excess deaths (week-to-week)", showarrow=True, arrowhead=1, font=dict(color="white"))
 
-    fig.add_trace(go.Scatter(x=df['date'], y=df['weekly cases'], name='weekly cases'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['weekly cases'], name='weekly cases', showlegend=False), row=2, col=1)
     for i, column in enumerate(vaccination_columns):
         fig.add_trace(go.Scatter(x=df['date'], y=df[column], name=column, showlegend=False), row=3, col=1)
+        fig.update_yaxes(range=[0, 100], row=3, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['Government Response Index Average'],
+                             name='Government Response Index Average', showlegend=False),  row=4, col=1)
+    fig.update_yaxes(range=[0, 100], row=4, col=1)
     for i, column in enumerate(google_columns):
-        fig.add_trace(go.Scatter(x=df['date'], y=df[column], name=column), row=4, col=1)
+        fig.add_trace(go.Scatter(x=df['date'], y=df[column], name=column), row=5, col=1)
 
     fig.update_yaxes(showline=False, linewidth=1, linecolor='#191919', mirror=True, tickfont=dict(color='#ffffff'),
                      showgrid=False)
@@ -263,13 +269,78 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
 
     fig.update_layout(height=700, showlegend=True,
-                        legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1),
-                      plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text'])
+                        legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1, bgcolor='rgba(0,0,0,0.23)'),
+                      plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text']),
+                      # legend_bgcolor='#191919')
     # change padding between subplots
     fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=700)
 
     return fig
 
+def create_covid_policy_sparklines_for_country_subset(df, country, color='#59c41a'):
+    all_indices = ['School closing', 'Workplace closing', 'Cancel public events', 'Restrictions on gatherings',
+            'Stay at home requirements', 'Restrictions on internal movement']
+    covid = df.copy()
+    covid = covid.loc[covid['country'] == country].copy()
+    # change all values to 0 or 1
+
+    fig = make_subplots(rows=len(all_indices), cols=1, shared_xaxes=True,
+
+                        subplot_titles=all_indices, vertical_spacing=0.1)
+    row = 1
+    for variable in all_indices:
+        fig.append_trace(go.Scatter(
+            x=covid['date'],
+            y=covid[variable],
+            line=dict(width=1, color=color),
+            name=variable,
+        ), row=row, col=1)
+        fig.layout.annotations[row-1].update(text=f'{variable} ({covid[variable].count()})')
+        if variable=='School closing':
+            fig.append_trace(go.Scatter(
+                    x=covid['date'],
+                    y=covid['All School closing'],
+                    name = 'All',
+                    #line thickness to 3
+                    line=dict(width=5, color=color)
+                ), row=row, col=1)
+            days=covid[variable].count()+covid["All School closing"].count()
+            fig.layout.annotations[row - 1].update(text=f'All/selected schools closing ({days} days)')
+            # add annotation with arrow that indicate "All School closing"
+            if covid['All School closing'].notnull().values.any():
+                first_index = covid['All School closing'].first_valid_index()
+                first_index = covid['All School closing'].index.get_loc(first_index)
+                fig.add_annotation(x=covid['date'].iloc[first_index], y=covid['All School closing'].iloc[first_index],
+                                   text="All", showarrow=True, arrowhead=1, arrowwidth=2, arrowcolor="#c1d542", font=dict(color="#c1d542"),
+                                   yanchor="top", xshift=3)
+
+        if variable=='Workplace closing':
+            fig.append_trace(go.Scatter(
+                x=covid['date'],
+                y=covid['All Workplace closing'],
+                name='All',
+                # line thickness to 3
+                line=dict(width=5, color=color),
+            ), row=row, col=1)
+            days=covid[variable].count()+covid["All Workplace closing"].count()
+            fig.layout.annotations[row - 1].update(text=f'All/selected workplaces closing ({days})')
+        row += 1
+
+
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_yaxes(visible=False, showticklabels=True)
+    fig.update_xaxes(showline=False, linewidth=1, linecolor='#191919', mirror=True, tickfont=dict(color='#ffffff'),
+                     showgrid=False)
+    fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+    # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
+    fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
+
+    fig.update_layout(height=300, showlegend=False, #show_title=False, # title_text=f'policy response in {country}',
+                      plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text'])
+    # change padding between subplots
+    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=400)
+    # fig.write_html(f'temp\plots\{country}.html', auto_open=True)
+    return fig
 
 ############ layout elements ############
 default_country = 'Poland'
@@ -298,6 +369,19 @@ excess_deaths_map_fig = create_map()
 excess_deaths_map = dcc.Graph(id='excess_deaths_map', figure=excess_deaths_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
 
 # website layout
+
+intro_markdown_text = '''
+During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
+The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
+and it is more reliable than the number of deaths officially attributed to coronavirus ([read Eurostat article about excess deaths](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)).
+
+The worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more then 19% of excess deaths during 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower then 7%.
+'''
+
+intro_markdown_text2 = '''
+Choose a country, to explore how it dealt with coronavirus pandemic: 
+'''
+
 excess_deaths_chart_df, message_excess_deaths, datasource_note = create_what_if_deaths_explanation(df, default_country) #todo get rid of this datasource note - we can wrte it with html
 excess_deaths_chart_fig = create_what_if_deaths_plot(excess_deaths_chart_df, default_country,
                                                      "plotly_dark", 'white', ("#656565", "#4b4b4b", "#a31212"))
@@ -319,25 +403,15 @@ message_what_if_deaths = html.Div([
         dcc.Markdown(children=message_excess_deaths, id="message_what_if_deaths"),
     ])
 
-weekly_charts_text = intro_markdown_text2 = '''
+weekly_charts_text = '''
 Explore how coronavirus pandemic unfolded on weekly basis in the selected country.
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
 weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig)
 
-intro_markdown_text = '''
-During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
-The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
-and it is more reliable than the number of deaths officially attributed to coronavirus ([read Eurostat article about excess deaths](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)).
-
-The worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more then 19% of excess deaths during 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower then 7%.
-'''
-
-intro_markdown_text2 = '''
-Choose a country, to explore how it dealt with coronavirus pandemic: 
-'''
-
+polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
+polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
 
 ############ layout ############
 
@@ -362,7 +436,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     message_what_if_deaths,
     excess_deaths_explanation,
     weekly_charts_intro,
-    weekly_charts
+    weekly_charts,
+    polices_charts
 ])
 
 ########## callbacks ##########
@@ -371,6 +446,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     Output("excess_deaths_message", "children"),
     Output("message_what_if_deaths", "children"),
     Output("weekly_charts", "figure"),
+    Output("polices_charts", "figure"),
     Input("dropdown", "value"),
 )
 def update_bar_chart(country):
@@ -388,8 +464,9 @@ def update_bar_chart(country):
                             f"it would have lost {what_if_deaths} people, not {excess_deaths_in_selected_country}. "
 
     weekly_charts_fig = df_visualization_weekly_short(df_weekly, country=country)
+    polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country=country)
 
-    return excess_deaths_chart_fig, message_excess_deaths, message_what_if_deaths, weekly_charts_fig
+    return excess_deaths_chart_fig, message_excess_deaths, message_what_if_deaths, weekly_charts_fig, polices_fig
 
 if __name__ == "__main__":
     app.run_server(debug=True)
