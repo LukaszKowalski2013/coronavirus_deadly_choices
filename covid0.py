@@ -44,7 +44,7 @@ xy_ranking = pd.read_csv('data\gdf_ranking.csv')
 #
 # df_weekly = df_weekly.merge(x, left_on= ['location', 'date'],right_on=['country', 'date'], how='outer')
 # df_weekly.to_csv("E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
-df_weekly = pd.read_csv("D:\Inny_Swiat\pythonGames\dash_world\data\output_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
+df_weekly = pd.read_csv("data\output_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
 # change all values inside google columns to normal text without underscore
 # gdf_ranking = gdf2[['ranking', 'geometry']]
 # gdf_ranking['lat'] = gdf_ranking.geometry.centroid.y
@@ -66,7 +66,7 @@ def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     return f"{what_if_deaths}K", f"{excess_deaths_in_K}K"
 
 def get_official_covid_deaths_by_country():
-    covid_deaths = pd.read_csv(r"D:\Inny_Swiat\pythonGames\dash_world\other_data\_selected_eu\df_weekly_merged.csv")
+    covid_deaths = pd.read_csv(r"data\output_data\eu_countries\df_weekly_merged.csv") #todo take it out of here
     covid_deaths = covid_deaths[['location', 'date', 'weekly_cases', 'weekly_deaths']]
     covid_deaths.weekly_deaths.sum()
     # choose deaths from first week of 2023
