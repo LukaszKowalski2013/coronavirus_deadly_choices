@@ -25,6 +25,8 @@ colors = {
 
 ############data############:
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+server = app.server
+
 df_path = r'data\output_data\eu_countries\df_yearly.csv'
 df = pd.read_csv(df_path)
 gdf = gpd.read_file(r"data\eu.geojson")
