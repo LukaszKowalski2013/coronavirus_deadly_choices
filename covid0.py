@@ -34,12 +34,12 @@ server = app.server
 
 df_path = r'data\output_data\eu_countries\df_yearly.csv'
 df = pd.read_csv(df_path)
-gdf = gpd.read_file(r"data\eu.geojson" )
-covid2 = pd.read_csv(r'data\output_data\covid2.csv')
+gdf = gpd.read_file(r"data/eu.geojson" )
+covid2 = pd.read_csv(r'data/output_data/covid2.csv')
 gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
-xy_ranking = pd.read_csv('data\gdf_ranking.csv')
-covid_deaths = pd.read_csv(r"data\output_data\_selected_eu\df_weekly_merged.csv")
+xy_ranking = pd.read_csv('data/gdf_ranking.csv')
+covid_deaths = pd.read_csv(r"data/output_data/_selected_eu/df_weekly_merged.csv")
 
 df_weekly = pd.read_csv("data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv")
 
@@ -316,7 +316,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color='#59c41
                       plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text'])
     # change padding between subplots
     fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=400)
-    # fig.write_html(f'temp\plots\{country}.html', auto_open=True)
+
     return fig
 
 ############ layout elements ############
