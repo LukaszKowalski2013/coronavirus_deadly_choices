@@ -34,7 +34,7 @@ server = app.server
 current_directory = os.path.dirname(__file__)
 
 # csv_file_path = os.path.join(current_directory, relative_path_to_csv)
-df_path = os.path.join(current_directory, 'data\output_data\eu_countries\df_yearly.csv')
+df_path = os.path.join(current_directory, 'data/output_data/eu_countries/df_yearly.csv')
 df = pd.read_csv(df_path)
 gdf = gpd.read_file(os.path.join(current_directory, "data/eu.geojson"))
 covid2 = pd.read_csv(os.path.join(current_directory,'data/output_data/covid2.csv'))
@@ -396,7 +396,7 @@ ending_markdown_text = '''
 
 Charts and maps were created based on following data sources:
 - Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat](https://ec.europa.eu/eurostat/databrowser/view/DEMO_MEXRT__custom_309801/bookmark/table?lang=en&bookmarkId=26981184-4241-4855-b18e-8647fc8c0dd2)
-- Confirmed cases and deaths - [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
+- Confirmed weekly cases and deaths (chart) [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
 - Vaccination rate [Our World in Data](https://github.com/owid/covid-19-data)
 - Government Response Index Average and data on restrictions [Oxford COVID-19 Government Response Tracker, Blavatnik School of Government, University of Oxford.](https://github.com/OxCGRT/covid-policy-dataset)
 - Google mobility change by activity time [Google Mobility Reports] (https://www.google.com/covid19/mobility/)
