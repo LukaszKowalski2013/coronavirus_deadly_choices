@@ -15,6 +15,11 @@ import io
 from dash import Dash, dcc, html, Input, Output
 
 import geopandas as gpd
+import os
+
+# Get the current directory (root of your GitHub repository)
+current_directory = os.path.dirname(__file__)
+os.chdir(current_directory)
 
 ############style############:
 colors = {
