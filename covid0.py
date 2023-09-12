@@ -32,14 +32,14 @@ colors = {
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
-df_path = r'data\output_data\eu_countries\df_yearly.csv'
+df_path = 'data\output_data\eu_countries\df_yearly.csv'
 df = pd.read_csv(df_path)
-gdf = gpd.read_file(r"data/eu.geojson" )
-covid2 = pd.read_csv(r'data/output_data/covid2.csv')
+gdf = gpd.read_file("data/eu.geojson" )
+covid2 = pd.read_csv('data/output_data/covid2.csv')
 gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
 xy_ranking = pd.read_csv('data/gdf_ranking.csv')
-covid_deaths = pd.read_csv(r"data/output_data/_selected_eu/df_weekly_merged.csv")
+covid_deaths = pd.read_csv("data/output_data/_selected_eu/df_weekly_merged.csv")
 
 df_weekly = pd.read_csv("data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv")
 
