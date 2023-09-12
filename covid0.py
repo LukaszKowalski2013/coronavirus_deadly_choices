@@ -16,15 +16,15 @@ from dash import Dash, dcc, html, Input, Output
 
 import geopandas as gpd
 import os
-
-
+import base64
+from PIL import Image
 
 ############style############:
 colors = {
     'background': '#111111',
     'text': '#FFFFFF'
 }
-# default_width = 1000
+#
 
 ############data############:
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
@@ -347,8 +347,14 @@ covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig, style={'
 excess_deaths_map_fig = create_map()
 excess_deaths_map = dcc.Graph(id='excess_deaths_map', figure=excess_deaths_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
 
-# website layout
+# header_map_fig = render_image_map()
+# header_map = dcc.Graph(id='header_map', figure=header_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
+# app.layout = html.Div([
+#     html.Img(src='data:image/png;base64,{}'.format(encoded_image))
+# ])
 
+
+# website layout
 intro_markdown_text = '''
 During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
 The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
@@ -395,7 +401,7 @@ polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
 ending_markdown_text = '''
 
 Charts and maps were created based on following data sources:
-- Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat](https://ec.europa.eu/eurostat/databrowser/view/DEMO_MEXRT__custom_309801/bookmark/table?lang=en&bookmarkId=26981184-4241-4855-b18e-8647fc8c0dd2)
+- Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat](https://data.europa.eu/data/datasets/whum2ir8f4kymrrkj1srq?locale=en)
 - Confirmed weekly cases and deaths (chart) [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
 - Vaccination rate [Our World in Data](https://github.com/owid/covid-19-data)
 - Government Response Index Average and data on restrictions [Oxford COVID-19 Government Response Tracker, Blavatnik School of Government, University of Oxford.](https://github.com/OxCGRT/covid-policy-dataset)
@@ -408,7 +414,9 @@ Broaden your knowledge here:
 
 ############ layout ############
 
-app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+app.layout = html.Div(style={'backgroundColor': colors['background']},
+
+                      children=[
     html.H1(
         children='Coronavirus - deadly choices',
         style={'textAlign': 'center', 'color': colors['text']}
