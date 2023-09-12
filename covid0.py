@@ -17,9 +17,7 @@ from dash import Dash, dcc, html, Input, Output
 import geopandas as gpd
 import os
 
-# Get the current directory (root of your GitHub repository)
-current_directory = os.path.dirname(__file__)
-os.chdir(current_directory)
+
 
 ############style############:
 colors = {
@@ -32,19 +30,23 @@ colors = {
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 server = app.server
 
-df_path = 'data\output_data\eu_countries\df_yearly.csv'
+# Get the current directory (root of your GitHub repository)
+current_directory = os.path.dirname(__file__)
+
+# csv_file_path = os.path.join(current_directory, relative_path_to_csv)
+df_path = os.path.join(current_directory, 'data\output_data\eu_countries\df_yearly.csv')
 df = pd.read_csv(df_path)
-gdf = gpd.read_file("data/eu.geojson" )
-covid2 = pd.read_csv('data/output_data/covid2.csv')
+gdf = gpd.read_file(os.path.join(current_directory, "data/eu.geojson"))
+covid2 = pd.read_csv(os.path.join(current_directory,'data/output_data/covid2.csv'))
 gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
-xy_ranking = pd.read_csv('data/gdf_ranking.csv')
-covid_deaths = pd.read_csv("data/output_data/_selected_eu/df_weekly_merged.csv")
+xy_ranking = pd.read_csv(os.path.join(current_directory, 'data/gdf_ranking.csv'))
+covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_merged.csv"))
 
-df_weekly = pd.read_csv("data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv")
+df_weekly = pd.read_csv(os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
 
 ############ methods ############:
-polices = pd.read_csv("data/output_data/polices.csv")
+polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
 
 def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     expected_deaths = covid_df.loc[covid_df['country'] == country, 'expected deaths (2020-2022)'].values[0]
