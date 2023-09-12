@@ -33,27 +33,9 @@ gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
 xy_ranking = pd.read_csv('data\gdf_ranking.csv')
 covid_deaths = pd.read_csv(r"data\output_data\_selected_eu\df_weekly_merged.csv")
-# df_weekly = pd.read_csv(r"E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\df_weekly_merged.csv")
-#
-# x = pd.read_csv(r"E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\my_df_weekly.csv")
-# x = x[['country', 'date', 'excess_deaths']]
-# x['date'] = x['date'].astype('datetime64[ns]')
-# #select only data from 2020-2022
-# x = x.loc[x.date >= '2020-01-01']
-# x = x.loc[x.date < '2023-01-01']
-# x['date'] = x['date'].astype('str')
-#
-# df_weekly = df_weekly.merge(x, left_on= ['location', 'date'],right_on=['country', 'date'], how='outer')
-# df_weekly.to_csv("E:\swiat_gis\covid_deadly_choices_data\other_data\_selected_eu\df_weekly_mine_and_other_sources.csv")
+
 df_weekly = pd.read_csv("data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv")
-# change all values inside google columns to normal text without underscore
-# gdf_ranking = gdf2[['ranking', 'geometry']]
-# gdf_ranking['lat'] = gdf_ranking.geometry.centroid.y
-# gdf_ranking['lon'] = gdf_ranking.geometry.centroid.x
-# gdf_ranking['area'] = gdf_ranking.area
-# gdf_ranking.sort_values(by='area', ascending=False, inplace=True)
-# gdf_ranking.drop_duplicates(subset=['ranking'], how= 'first', inplace=True)
-# gdf_ranking = gdf_ranking[['ranking', 'lat', 'lon']]
+
 ############ methods ############:
 polices = pd.read_csv("data/output_data/polices.csv")
 
@@ -160,19 +142,7 @@ def create_map(mapbox_style="carto-darkmatter"):
                                            'excess deaths in % (2020-2022)': True,  # '.1f',
                                            'ranking': False,  #
                                            })
-    # # add labels with scattergeo
-    # fig.add_trace(go.Scattergeo(
-    #     lon=xy_ranking['lon'],
-    #     lat=xy_ranking['lat'],
-    #     text=xy_ranking['ranking'],
-    #     mode='text',
-    #     textfont=dict(
-    #         family="sans serif",
-    #         size=12,
-    #         color="white",
-    #     ),
-    #     showlegend=False,
-    # ))
+
     fig.update_layout(
         plot_bgcolor='rgba(1,1,1,1)', title_x=0.5, title_y=0.97,
         font=dict(color="white"),

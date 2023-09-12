@@ -171,3 +171,8 @@ xz=5.2.6=h8d14728_0
 zipp=3.16.2=pyhd8ed1ab_0
 zlib=1.2.13=hcfcfb64_5
 zstd=1.5.2=h12be248_7
+
+dash~=2.7.0
+plotly~=5.9.0
+pandas~=2.1.0
+numpy~=1.25.2
