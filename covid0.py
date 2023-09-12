@@ -29,7 +29,7 @@ server = app.server
 
 df_path = r'data\output_data\eu_countries\df_yearly.csv'
 df = pd.read_csv(df_path)
-gdf = gpd.read_file(r"data\eu.geojson")
+gdf = gpd.read_file(r"data\eu.geojson" )
 covid2 = pd.read_csv(r'data\output_data\covid2.csv')
 gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
