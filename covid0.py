@@ -13,16 +13,41 @@ from dash import Dash, dcc, html, Input, Output
 import geopandas as gpd
 import os
 
-
 ############style############:
+# DARK SIDE
+# dbc_style = dbc.themes.DARKLY
+# colors = {
+#     'background': '#111111',
+#     'text': '#FFFFFF'
+# }
+# dropdown_button_color = '#d10000'
+mapbox_style = "carto-darkmatter"  # DOES NOT MATTER NOW
+# what_if_colors= ("#656565", "#4b4b4b", "#a31212")
+# what_if_line_color = 'black'
+# almost_black = '#191919'
+# tickfont_color = '#FFFFFF'
+# sparkline_annotation_text_color = "#c1d542"
+# sparkline_arrow_color = "#c1d542"
+# what_if_deaths_plot = "plotly_dark"
+sparkline_color = '#59c41a'
+# bright side
+my_dbc_style = dbc.themes.MATERIA
 colors = {
-    'background': '#111111',
-    'text': '#FFFFFF'
+    'background': '#FFFFFF',  # white
+    'text': '#111111',
 }
-#
+dropdown_button_color = '#e8393f'
+what_if_colors = ('#b1b1b1', '#8b8b8b', '#e8393f') # grey, dark grey, red
+what_if_line_color = '#111111'  # white
+what_if_average_color = '#000000'  # black
+almost_black = '#d9d9d9'  # inverted
+tickfont_color = '#111111'
+sparkline_annotation_text_color = "#1ea226"
+sparkline_arrow_color = "#1ea226"
+plotly_template = "plotly_white"
 
 ############data############:
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = Dash(__name__, external_stylesheets=[my_dbc_style])
 server = app.server
 
 # Get the current directory (root of your GitHub repository)
@@ -41,7 +66,7 @@ covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_se
 df_weekly = pd.read_csv(
     os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
 
-header_image_link= 'https://drive.google.com/uc?export=view&id=1IZDgtGb8Tn-DRR20YfYr-xQSAmk78FyR'
+header_image_link = 'https://drive.google.com/uc?export=view&id=1IZDgtGb8Tn-DRR20YfYr-xQSAmk78FyR'
 
 ############ methods ############:
 polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
@@ -51,7 +76,7 @@ def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     expected_deaths = covid_df.loc[covid_df['country'] == country, 'expected deaths (2020-2022)'].values[0]
     excess_deaths = covid_df.loc[covid_df['country'] == country, 'excess deaths (2020-2022)'].values[0]
     excess_deaths_what_if_prc = \
-    covid_df.loc[covid_df['country'] == country_to_compare, 'excess deaths in % (2020-2022)'].values[0]
+        covid_df.loc[covid_df['country'] == country_to_compare, 'excess deaths in % (2020-2022)'].values[0]
     what_if_deaths = (expected_deaths * excess_deaths_what_if_prc / 100) / 1000
     what_if_deaths = what_if_deaths.round(0).astype(int)
     excess_deaths_in_K = (excess_deaths / 1000).round(0).astype(int)
@@ -116,15 +141,15 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
     return df, message, datasource_note
 
 
-def create_what_if_deaths_plot(df, country='Poland', template='plotly', line_color='black',
-                               colors=("#656565", "#4b4b4b", "#a31212")):
+def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, line_color=what_if_average_color,
+                               colors=what_if_colors):
     fig = px.bar(df, x='year', y='deaths',
                  hover_data=['description', 'deaths'], color='description',
                  color_discrete_sequence=colors,  # labels={'pop':'population of Canada'},
                  template=template, height=523)
 
-    fig.add_hline(y=df['avg_deaths'].mean(), line_width=3, line_dash="dash", line_color=line_color,
-                  annotation_text="average 2016-2019 deaths", annotation_position="bottom right",
+    fig.add_hline(y=df['avg_deaths'].mean(), line_width=3, line_dash="dash", line_color=what_if_average_color,
+                  annotation_text="average 2016-2019 deaths", annotation_position="top left",  # "bottom left"
                   annotation_font=dict(size=17))
 
     fig.update_layout(title_text=f"excess deaths in {country}", title_font_size=17, title_x=0.5, title_y=0.9,
@@ -135,7 +160,7 @@ def create_what_if_deaths_plot(df, country='Poland', template='plotly', line_col
 
 
 # create map with excess deaths per country
-def create_map(mapbox_style="carto-darkmatter"):
+def create_map(mapbox_style=mapbox_style):
     fig = px.choropleth_mapbox(gdf2,
                                geojson=gdf2.geometry,
                                locations=gdf2.index,
@@ -233,10 +258,13 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
         fig.add_trace(go.Scatter(x=df['date'], y=df[column], name=column, showlegend=False), row=1, col=1, )
 
     # add annotation with arrows that indicate "excess deaths" and "weekly deaths"
-    fig.add_annotation(x=df['date'].iloc[50], y=df['weekly deaths'].iloc[50], arrowcolor="#a6a6a6",
-                       text="official coronavirus deaths", showarrow=True, arrowhead=1, font=dict(color="white"))
-    fig.add_annotation(x=df['date'].iloc[100], y=df['excess deaths'].iloc[100], arrowcolor="#a6a6a6",
-                       text="excess deaths (week-to-week)", showarrow=True, arrowhead=1, font=dict(color="white"))
+    fig.add_annotation(x=df['date'].iloc[50], y=df['weekly deaths'].iloc[50],
+                       # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
+                       text="official coronavirus deaths", showarrow=True, arrowhead=1, font=dict(color=colors['text']))
+    fig.add_annotation(x=df['date'].iloc[100], y=df['excess deaths'].iloc[100],
+                       # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
+                       text="excess deaths (week-to-week)", showarrow=True, arrowhead=1,
+                       font=dict(color=colors['text']))
 
     fig.add_trace(go.Scatter(x=df['date'], y=df['weekly cases'], name='weekly cases', showlegend=False), row=2, col=1)
     for i, column in enumerate(vaccination_columns):
@@ -248,24 +276,26 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     for i, column in enumerate(google_columns):
         fig.add_trace(go.Scatter(x=df['date'], y=df[column], name=column), row=5, col=1)
 
-    fig.update_yaxes(showline=False, linewidth=1, linecolor='#191919', mirror=True, tickfont=dict(color='#ffffff'),
+    fig.update_yaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
+                     tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(showline=False, linewidth=1, linecolor='#191919', mirror=True, tickfont=dict(color='#ffffff'),
+    fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
+                     tickfont=dict(color=tickfont_color),
                      showgrid=False)
     fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
 
     fig.update_layout(height=700, showlegend=True,
                       legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1,
                                   bgcolor='rgba(0,0,0,0.23)'),
-                      plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text']),
-    # legend_bgcolor='#191919')
+                      plot_bgcolor=colors['background'], paper_bgcolor=almost_black, font_color=colors['text']),
+    # legend_bgcolor=almost_black)
     # change padding between subplots
     fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=700)
 
     return fig
 
 
-def create_covid_policy_sparklines_for_country_subset(df, country, color='#59c41a'):
+def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkline_color):
     all_indices = ['School closing', 'Workplace closing', 'Cancel public events', 'Restrictions on gatherings',
                    'Stay at home requirements', 'Restrictions on internal movement']
     covid = df.copy()
@@ -295,12 +325,14 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color='#59c41
             days = covid[variable].count() + covid["All School closing"].count()
             fig.layout.annotations[row - 1].update(text=f'All/selected schools closing ({days} days)')
             # add annotation with arrow that indicate "All School closing"
+
             if covid['All School closing'].notnull().values.any():
                 first_index = covid['All School closing'].first_valid_index()
                 first_index = covid['All School closing'].index.get_loc(first_index)
                 fig.add_annotation(x=covid['date'].iloc[first_index], y=covid['All School closing'].iloc[first_index],
-                                   text="All", showarrow=True, arrowhead=1, arrowwidth=2, arrowcolor="#c1d542",
-                                   font=dict(color="#c1d542"),
+                                   text="All", showarrow=True, arrowhead=1, arrowwidth=2,
+                                   arrowcolor=sparkline_arrow_color,
+                                   font=dict(color=sparkline_annotation_text_color),
                                    yanchor="top", xshift=3)
 
         if variable == 'Workplace closing':
@@ -315,16 +347,17 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color='#59c41
             fig.layout.annotations[row - 1].update(text=f'All/selected workplaces closing ({days})')
         row += 1
 
-    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
+    # fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
     fig.update_yaxes(visible=False, showticklabels=True)
-    fig.update_xaxes(showline=False, linewidth=1, linecolor='#191919', mirror=True, tickfont=dict(color='#ffffff'),
+    fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
+                     tickfont=dict(color=tickfont_color),
                      showgrid=False)
     fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
 
     fig.update_layout(height=300, showlegend=False,  # show_title=False, # title_text=f'policy response in {country}',
-                      plot_bgcolor=colors['background'], paper_bgcolor='#191919', font_color=colors['text'])
+                      plot_bgcolor=colors['background'], paper_bgcolor=almost_black, font_color=colors['text'])
     # change padding between subplots
     fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=400)
 
@@ -338,15 +371,17 @@ dropdown_country = dcc.Dropdown(
     # show drop down values based on ranking_list
     options=[{'label': i[0], 'value': i[1]} for i in ranking_list],
     value=default_country,
-    style={'width': '99%',
-           'background-color': '#656565',
-           'color': '#a31212',
+    # color="danger",
+    style={
+        # 'width': '73%',
+           'background-color': dropdown_button_color,  # colors['background'], #'#656565',
+           'color': colors['text'],  # '#a31212',
            'border': '1px solid white',
            'text-align': 'center',
            'margin': 'auto',
            'display': 'block',
            'font-size': '21px',
-           'font-family': 'Arial',
+           # 'font-family': 'Arial',
            # 'font-weight': 'bold',
            }
 )
@@ -367,6 +402,10 @@ excess_deaths_map = dcc.Graph(id='excess_deaths_map', figure=excess_deaths_map_f
 
 
 # website layout
+# markdown text with thick red seperator line
+header_markdown_text = '''# Deadly Choices - Coronavirus Ranking
+'''
+
 intro_markdown_text = '''
 During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
 The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
@@ -376,13 +415,14 @@ The worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus
 '''
 
 intro_markdown_text2 = '''
-Choose a country, to explore how it dealt with coronavirus pandemic: 
+---
+# Choose a country, to explore how it dealt with coronavirus pandemic: 
 '''
 
 excess_deaths_chart_df, message_excess_deaths, datasource_note = create_what_if_deaths_explanation(df,
                                                                                                    default_country)  # todo get rid of this datasource note - we can wrte it with html
 excess_deaths_chart_fig = create_what_if_deaths_plot(excess_deaths_chart_df, default_country,
-                                                     "plotly_dark", 'white', ("#656565", "#4b4b4b", "#a31212"))
+                                                     plotly_template, what_if_line_color, what_if_colors)
 
 excess_deaths_chart_fig.update_layout(plot_bgcolor=colors['background'], paper_bgcolor=colors['background'],
                                       font_color=colors['text'])
@@ -413,7 +453,7 @@ polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country
 polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
 
 ending_markdown_text = '''
-
+---
 Charts and maps were created based on following data sources:
 - Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat](https://data.europa.eu/data/datasets/whum2ir8f4kymrrkj1srq?locale=en)
 - Confirmed weekly cases and deaths (chart) [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
@@ -428,46 +468,59 @@ Broaden your knowledge here:
 
 ############ layout ############
 
-app.layout =  html.Div(style={
-    # 'backgroundColor': colors['background'],
-                             #max width of website should be 90% of screen
-                             'max-width': '90%',
-                             # other margins should be 5% of screen
-                            'margin': '5% auto',
-                             },
+app.layout = html.Div(style={
+    'max-width': '90%',
+    'margin': '5% auto',
+},
 
-                      children=[
-                          #header image:
-                            html.Div([
-                                    html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto'})
-                                ]),
+    children=[
+        html.Div([
+            # Header image with markdown text
+            html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto', 'max-width': '100%'},
+                     title = "excess deaths map"
+                     ),
+]),
+        html.Div([
+                        dcc.Markdown(children=header_markdown_text, style={'max-width': '50%',}, id="header_markdown_text"),
+                    ]),
+        #add thick red seperator line in color of danger
+        html.Div(style={'background-color': '#e8393f', 'height': '10px', 'width': '100%'}),
 
-                          # html.H1(
-                          #     children='Coronavirus - deadly choices',
-                          #     style={'textAlign': 'center', 'color': colors['text']}
-                          # ),
-                          html.Div([
-                              dcc.Markdown(children=intro_markdown_text),
-                          ]),
+        html.Div([
+            dcc.Markdown(children=intro_markdown_text),
+        ]),
 
-                          # excess_deaths_map,
-                          covid_ranking,
+        # excess_deaths_map,
+        covid_ranking,
 
-                          html.Div([
-                              dcc.Markdown(children=intro_markdown_text2),
-                          ]),
-                          dropdown_country,
+        html.Div([
+            dcc.Markdown(children=intro_markdown_text2),
+        ]),
+        dropdown_country,
 
-                          message_excess_deaths_text,
-                          message_what_if_deaths,
-                          excess_deaths_explanation,
-                          weekly_charts_intro,
-                          weekly_charts,
-                          polices_charts,
-                          html.Div([
-                              dcc.Markdown(children=ending_markdown_text),
-                          ])
-                      ])
+        message_excess_deaths_text,
+        message_what_if_deaths,
+        excess_deaths_explanation,
+        weekly_charts_intro,
+        weekly_charts,
+        polices_charts,
+        html.Div([
+            dcc.Markdown(children=ending_markdown_text),
+        ]),
+
+        html.Div(
+            [
+                dbc.Button(
+                    "Explore excess deaths interactive map (opens in new tab)",
+                    href="https://sites.google.com/view/games4earth/kepler-gl-maps",
+                    external_link=True,
+                    color="danger",
+                    target="_blank",
+                ),
+            ]
+        )
+    ]
+)
 
 
 ########## callbacks ##########
@@ -479,12 +532,11 @@ app.layout =  html.Div(style={
     Output("polices_charts", "figure"),
     Input("dropdown", "value"),
 )
-
 # callback method, updates all charts in the UI
 def update_bar_chart(country):
     excess_deaths_chart_df, message_excess_deaths, datasource_note = create_what_if_deaths_explanation(df, country)
     excess_deaths_chart_fig = create_what_if_deaths_plot(excess_deaths_chart_df, country,
-                                                         "plotly_dark", 'white', ("#656565", "#4b4b4b", "#a31212"))
+                                                         plotly_template, colors['background'], what_if_colors)
 
     what_if_deaths, excess_deaths_in_selected_country = get_what_if_deaths(covid2, country,
                                                                            country_to_compare='Sweden')
