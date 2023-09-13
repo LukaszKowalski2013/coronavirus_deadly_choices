@@ -14,7 +14,6 @@ import geopandas as gpd
 import os
 
 
-
 ############style############:
 colors = {
     'background': '#111111',
@@ -41,6 +40,8 @@ covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_se
 
 df_weekly = pd.read_csv(
     os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
+
+header_image_link= 'https://drive.google.com/uc?export=view&id=1IZDgtGb8Tn-DRR20YfYr-xQSAmk78FyR'
 
 ############ methods ############:
 polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
@@ -427,14 +428,20 @@ Broaden your knowledge here:
 
 ############ layout ############
 
-app.layout = html.Div(style={
+app.layout =  html.Div(style={
     # 'backgroundColor': colors['background'],
                              #max width of website should be 90% of screen
                              'max-width': '90%',
                              # other margins should be 5% of screen
                             'margin': '5% auto',
                              },
+
                       children=[
+                          #header image:
+                            html.Div([
+                                    html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto'})
+                                ]),
+
                           # html.H1(
                           #     children='Coronavirus - deadly choices',
                           #     style={'textAlign': 'center', 'color': colors['text']}
@@ -472,6 +479,7 @@ app.layout = html.Div(style={
     Output("polices_charts", "figure"),
     Input("dropdown", "value"),
 )
+
 # callback method, updates all charts in the UI
 def update_bar_chart(country):
     excess_deaths_chart_df, message_excess_deaths, datasource_note = create_what_if_deaths_explanation(df, country)
