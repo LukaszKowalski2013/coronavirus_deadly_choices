@@ -513,7 +513,7 @@ app.layout = html.Div(style={
             [
                 dbc.Button(
                     "Explore excess deaths interactive map (opens in new tab)",
-                    href="https://www.games4earth.com/excess-deaths-map",
+                    href="www.games4earth.com/excess-deaths-map",
                     external_link=True,
                     color="danger",
                     target="_blank",
