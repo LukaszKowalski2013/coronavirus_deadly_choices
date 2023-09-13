@@ -40,7 +40,7 @@ dropdown_button_color = '#e8393f'
 what_if_colors = ('#b1b1b1', '#8b8b8b', '#e8393f') # grey, dark grey, red
 what_if_line_color = '#111111'  # white
 what_if_average_color = '#000000'  # black
-almost_black = '#d9d9d9'  # inverted
+almost_black = '#ededed'  # inverted
 tickfont_color = '#111111'
 sparkline_annotation_text_color = "#1ea226"
 sparkline_arrow_color = "#1ea226"
@@ -282,7 +282,8 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+    fig.update_xaxes(tick0=0, dtick=3* 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+
 
     fig.update_layout(height=700, showlegend=True,
                       legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1,
@@ -352,7 +353,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+    fig.update_xaxes(tick0=0, dtick=3*30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear',)
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
 
@@ -512,7 +513,7 @@ app.layout = html.Div(style={
             [
                 dbc.Button(
                     "Explore excess deaths interactive map (opens in new tab)",
-                    href="https://sites.google.com/view/games4earth/kepler-gl-maps",
+                    href="https://https://www.games4earth.com/excess-deaths-map",
                     external_link=True,
                     color="danger",
                     target="_blank",
