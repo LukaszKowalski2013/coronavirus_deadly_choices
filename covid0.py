@@ -477,8 +477,8 @@ app.layout = html.Div(style={
     children=[
         html.Div([
             # Header image with markdown text
-            html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto', 'max-width': '100%'},
-                     title = "excess deaths map"
+            html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin':'0% auto'},
+                     title="excess deaths map"
                      ),
 ]),
         html.Div([
@@ -513,7 +513,7 @@ app.layout = html.Div(style={
             [
                 dbc.Button(
                     "Explore excess deaths interactive map (opens in new tab)",
-                    href="https://https://www.games4earth.com/excess-deaths-map",
+                    href="https://www.games4earth.com/excess-deaths-map",
                     external_link=True,
                     color="danger",
                     target="_blank",
