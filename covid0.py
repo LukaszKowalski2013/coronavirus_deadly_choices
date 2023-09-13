@@ -1,23 +1,19 @@
 import pandas as pd
-import os
 from plotly.subplots import make_subplots
-from urllib.request import urlopen
-import json
 import plotly.express as px
 import plotly.graph_objects as go
-# import geopandas as gpd
+
 import numpy as np
 from dash import Dash, dcc, html, Input, Output
 
 import dash_bootstrap_components as dbc
-from base64 import b64encode
-import io
+
 from dash import Dash, dcc, html, Input, Output
 
 import geopandas as gpd
 import os
-import base64
-from PIL import Image
+
+
 
 ############style############:
 colors = {
