@@ -600,21 +600,27 @@ app.layout = html.Div(style={
         weekly_charts,
         polices_charts,
         create_healthcare_rankings(),
+        # add a div with dbc button to redirect to another website:
+        html.Div([
+            # dcc.Markdown(children='''---'''),
+            html.Div([  dbc.Button("Explore excess deaths interactive map (opens in new tab)", color="danger",
+                                   href="https://www.games4earth.com/excess-deaths-map", target="_blank")
+                ]),
+            ]),
+
+        html.Div([dcc.Markdown(children='''---'''),
+                             dbc.Button("back to top", color="warning",
+                                 href="#dropdown", external_link=False,
+                             style={'padding': '5px 5px 5px 5px'})
+                  #     ,
+                  # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
+                  ]),
+
         html.Div([
             dcc.Markdown(children=ending_markdown_text),
         ]),
-        # html.Div(
-        #     [
-        #         dbc.Button(
-        #             "Explore excess deaths interactive map (opens in new tab)",
-        #             href="https://www.games4earth.com/excess-deaths-map",
-        #             external_link=True,
-        #             color="danger",
-        #             target="_blank",
-        #             style={'padding: 10px 10px 10px 10px'}
-        #         ),
-        #     ]
-        # )
+
+
     ]
 )
 
