@@ -37,7 +37,7 @@ colors = {
     'text': '#111111',
 }
 dropdown_button_color = '#e8393f'
-what_if_colors = ('#b1b1b1', '#8b8b8b', '#e8393f') # grey, dark grey, red
+what_if_colors = ('#b1b1b1', '#8b8b8b', '#e8393f')  # grey, dark grey, red
 what_if_line_color = '#111111'  # white
 what_if_average_color = '#000000'  # black
 almost_black = '#ededed'  # inverted
@@ -67,6 +67,17 @@ df_weekly = pd.read_csv(
     os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
 
 header_image_link = 'https://drive.google.com/uc?export=view&id=1IZDgtGb8Tn-DRR20YfYr-xQSAmk78FyR'
+
+icons_money = 'https://drive.google.com/uc?export=view&id=16gR6pwHxyMuFCqhjcfJvE-7V6dgl5MEB'
+icons_dr = 'https://drive.google.com/uc?export=view&id=1sRDt-fZVi2PZJ-He7PfpIkie9WFF33BH'
+icons_nurse = 'https://drive.google.com/uc?export=view&id=1UmlBsyt8P9uhX3aBQIC3i5uagJ-ybaqQ'
+icons_beds = 'https://drive.google.com/uc?export=view&id=14mF_YW6-DHKVdGgQBrQ1IUjbmcTIk_WH'
+icons_temp = 'https://drive.google.com/uc?export=view&id=1IxQa7Lwn6dPKiszMTPhpyMi3dIKPSXDW'
+# icons_dr = 'https://drive.google.com/file/d/1sRDt-fZVi2PZJ-He7PfpIkie9WFF33BH/view?usp=drive_link'
+# icons_money = 'https://drive.google.com/file/d/16gR6pwHxyMuFCqhjcfJvE-7V6dgl5MEB/view?usp=drive_link'
+# icons_beds = 'https://drive.google.com/file/d/14mF_YW6-DHKVdGgQBrQ1IUjbmcTIk_WH/view?usp=drive_link'
+# icons_nurse = 'https://drive.google.com/file/d/1UmlBsyt8P9uhX3aBQIC3i5uagJ-ybaqQ/view?usp=drive_link'
+# icons_temp = 'https://drive.google.com/file/d/1IxQa7Lwn6dPKiszMTPhpyMi3dIKPSXDW/view?usp=drive_link'
 
 ############ methods ############:
 polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
@@ -220,7 +231,10 @@ def create_covid_excess_deaths(covid2):
                              'ranking': False,  #
                              },
                  hover_name='ranking',
-                 orientation='h')
+                 orientation='h',
+                 # disable zooming
+                 range_x=[0, 25],
+                 )
     # set width and height of the figure
     fig.update_layout(
         plot_bgcolor=colors['background'], paper_bgcolor=colors['background'],
@@ -282,8 +296,7 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=3* 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
-
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
 
     fig.update_layout(height=700, showlegend=True,
                       legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1,
@@ -353,7 +366,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=3*30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear',)
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear', )
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
 
@@ -364,6 +377,55 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
 
     return fig
 
+def create_healthcare_rankings(country='Poland'):
+    healthcare_rankings = html.Div([
+        html.Div([
+            html.Div([
+                html.Img(src=icons_money,
+                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                'padding': '5px 5px 5px 5px', }),
+                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+            ]),
+        ]),
+
+        html.Div([
+            html.Div([
+                html.Img(src=icons_dr,
+                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                'padding': '5px 5px 5px 5px', }),
+                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+            ]),
+        ]),
+
+        html.Div([
+            html.Div([
+                html.Img(src=icons_nurse,
+                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                'padding': '5px 5px 5px 5px', }),
+                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+            ]),
+        ]),
+
+        html.Div([
+            html.Div([
+                html.Img(src=icons_beds,
+                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                'padding': '5px 5px 5px 5px', }),
+                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+            ]),
+        ]),
+
+        html.Div([
+            html.Div([
+                html.Img(src=icons_temp,
+                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                'padding': '5px 5px 5px 5px', }),
+                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+            ]),
+        ]),
+
+    ])
+    return healthcare_rankings
 
 ############ layout elements ############
 default_country = 'Poland'
@@ -375,16 +437,16 @@ dropdown_country = dcc.Dropdown(
     # color="danger",
     style={
         # 'width': '73%',
-           'background-color': dropdown_button_color,  # colors['background'], #'#656565',
-           'color': colors['text'],  # '#a31212',
-           'border': '1px solid white',
-           'text-align': 'center',
-           'margin': 'auto',
-           'display': 'block',
-           'font-size': '21px',
-           # 'font-family': 'Arial',
-           # 'font-weight': 'bold',
-           }
+        'background-color': dropdown_button_color,  # colors['background'], #'#656565',
+        'color': colors['text'],  # '#a31212',
+        'border': '1px solid white',
+        'text-align': 'center',
+        'margin': 'auto',
+        'display': 'block',
+        'font-size': '21px',
+        # 'font-family': 'Arial',
+        # 'font-weight': 'bold',
+    }
 )
 
 covid_ranking_fig, covid_ranking_title = create_covid_excess_deaths(covid2)
@@ -453,14 +515,26 @@ weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig)
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
 polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
 
+
+# show 5 images (icons) with text
+
+healthcare_rankings = create_healthcare_rankings('Poland')
+
 ending_markdown_text = '''
 ---
 Charts and maps were created based on following data sources:
-- Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat](https://data.europa.eu/data/datasets/whum2ir8f4kymrrkj1srq?locale=en)
+- Excess deaths were estimated based on Eurostat data on weekly deaths [Eurostat-1](https://data.europa.eu/data/datasets/whum2ir8f4kymrrkj1srq?locale=en)
 - Confirmed weekly cases and deaths (chart) [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
 - Vaccination rate [Our World in Data](https://github.com/owid/covid-19-data)
 - Government Response Index Average and data on restrictions [Oxford COVID-19 Government Response Tracker, Blavatnik School of Government, University of Oxford.](https://github.com/OxCGRT/covid-policy-dataset)
 - Google mobility change by activity time [Google Mobility Reports] (https://www.google.com/covid19/mobility/)
+- Health care expenditure [Eurostat-2](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_expenditure_statistics#Healthcare_expenditure)
+- Healthcare personnel statistics - physicians [Eurostat-3](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_physicians#Healthcare_personnel)
+- Healthcare personnel statistics - nursing and caring professionals [Eurostat-4](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_nursing_and_caring_professionals#Healthcare_personnel_.E2.80.93_nurses)
+- Healthcare resource statistics - beds [Eurostat-5](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_resource_statistics_-_beds#Hospital_beds)
+- Temporary COVID-19 Hospitals [NIK](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
+
+Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)
 
 Broaden your knowledge here:
 - [Eurostat article on excess deaths in EU between 2020 and 2023](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)
@@ -477,14 +551,15 @@ app.layout = html.Div(style={
     children=[
         html.Div([
             # Header image with markdown text
-            html.Img(src=header_image_link, style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin':'0% auto'},
+            html.Img(src=header_image_link,
+                     style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin': '0% auto'},
                      title="excess deaths map"
                      ),
-]),
+        ]),
         html.Div([
-                        dcc.Markdown(children=header_markdown_text, style={'max-width': '50%',}, id="header_markdown_text"),
-                    ]),
-        #add thick red seperator line in color of danger
+            dcc.Markdown(children=header_markdown_text, style={'max-width': '50%', }, id="header_markdown_text"),
+        ]),
+        # add thick red seperator line in color of danger
         html.Div(style={'background-color': '#e8393f', 'height': '10px', 'width': '100%'}),
 
         html.Div([
@@ -505,6 +580,7 @@ app.layout = html.Div(style={
         weekly_charts_intro,
         weekly_charts,
         polices_charts,
+        create_healthcare_rankings(),
         html.Div([
             dcc.Markdown(children=ending_markdown_text),
         ]),
@@ -513,7 +589,7 @@ app.layout = html.Div(style={
             [
                 dbc.Button(
                     "Explore excess deaths interactive map (opens in new tab)",
-                    href="www.games4earth.com/excess-deaths-map",
+                    href="https://www.games4earth.com/excess-deaths-map",
                     external_link=True,
                     color="danger",
                     target="_blank",
@@ -522,7 +598,6 @@ app.layout = html.Div(style={
         )
     ]
 )
-
 
 ########## callbacks ##########
 @app.callback(
