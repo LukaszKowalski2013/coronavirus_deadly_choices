@@ -62,6 +62,7 @@ gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
 ranking_list = list(zip(covid2.ranking, covid2.country))
 xy_ranking = pd.read_csv(os.path.join(current_directory, 'data/gdf_ranking.csv'))
 covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_merged.csv"))
+my_eurostat_healthcare_ranking = pd.read_csv(os.path.join(current_directory, 'data/my_eurostats_healthcare_ranking.csv'))
 
 df_weekly = pd.read_csv(
     os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
@@ -73,11 +74,6 @@ icons_dr = 'https://drive.google.com/uc?export=view&id=1sRDt-fZVi2PZJ-He7PfpIkie
 icons_nurse = 'https://drive.google.com/uc?export=view&id=1UmlBsyt8P9uhX3aBQIC3i5uagJ-ybaqQ'
 icons_beds = 'https://drive.google.com/uc?export=view&id=14mF_YW6-DHKVdGgQBrQ1IUjbmcTIk_WH'
 icons_temp = 'https://drive.google.com/uc?export=view&id=1IxQa7Lwn6dPKiszMTPhpyMi3dIKPSXDW'
-# icons_dr = 'https://drive.google.com/file/d/1sRDt-fZVi2PZJ-He7PfpIkie9WFF33BH/view?usp=drive_link'
-# icons_money = 'https://drive.google.com/file/d/16gR6pwHxyMuFCqhjcfJvE-7V6dgl5MEB/view?usp=drive_link'
-# icons_beds = 'https://drive.google.com/file/d/14mF_YW6-DHKVdGgQBrQ1IUjbmcTIk_WH/view?usp=drive_link'
-# icons_nurse = 'https://drive.google.com/file/d/1UmlBsyt8P9uhX3aBQIC3i5uagJ-ybaqQ/view?usp=drive_link'
-# icons_temp = 'https://drive.google.com/file/d/1IxQa7Lwn6dPKiszMTPhpyMi3dIKPSXDW/view?usp=drive_link'
 
 ############ methods ############:
 polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
@@ -378,13 +374,46 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     return fig
 
 def create_healthcare_rankings(country='Poland'):
+    df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
+    intro_text = f'''#####  Following data represents a state of healthcare system in {country} among other countries in this ranking:'''
+    ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+    money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+    money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
+    money_text = f"Healthcare expenditure in 2020 in euro (per inhabitant): {country} has {ranks_money}/28 place in ranking. In 2020 it spent {money_data} euro per inhabitant ({money_old_data} in 2012)."
+
+    dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
+    dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+    rank_dr20=df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+    dr_text = f"Practising physicians in 2021 (per 100K inhabitants): {country} has {rank_dr20}/28 place in ranking. In 2021 it had {dr20} physicians per 100K inhabitant ({dr16} in 2016)."
+
+    nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
+    nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+    rank_nurses20=df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+    if country== 'Poland':
+        nurses_text = f"Practising nurses in 2017 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2017 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015). Note: Eurostat has data for Poland only for 2017, while for other countries for 2020."
+    else:
+        nurses_text = f"Practising nurses in 2020 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2020 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015)."
+
+    beds09=df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
+    beds19= df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+    rank_beds19=df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+    beds_text = f"Curative care beds in hospitals in 2019 (per 100K inhabitants): {country} has {rank_beds19}/28 place in ranking. In 2019 it had {beds19} beds per 100K inhabitant ({beds09} in 2009)."
+
+    if country=='Poland':
+        temporary_beds = '''###### Moreover, according to Supreme Audit Office: "Temporary hospitals in Poland were built in Poland since October 2020 on a scale unseen in Europe, without any plan or reliable analysis of the epidemiological situation or availability of medical staff, and also without any cost calculation – NIK established. According to the Polish SAI over PLN 612.6 million was spent ineffectively and without purpose on the creation, functioning and liquidation of temporary hospitals located in large-format buildings." [NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)'''
+    else:
+        temporary_beds = ''
+
     healthcare_rankings = html.Div([
+        html.Div([dcc.Markdown(children=['''---''', intro_text]),
+        ]),
+
         html.Div([
             html.Div([
                 html.Img(src=icons_money,
                          style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+                                'padding': '5px 5px 5px 5px'}),
+                dcc.Markdown(children=money_text, style={'display': 'inline-block'}),
             ]),
         ]),
 
@@ -393,7 +422,7 @@ def create_healthcare_rankings(country='Poland'):
                 html.Img(src=icons_dr,
                          style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
                                 'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+                dcc.Markdown(children=dr_text, style={'display': 'inline-block'}),
             ]),
         ]),
 
@@ -402,7 +431,7 @@ def create_healthcare_rankings(country='Poland'):
                 html.Img(src=icons_nurse,
                          style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
                                 'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+                dcc.Markdown(children=nurses_text, style={'display': 'inline-block'}),
             ]),
         ]),
 
@@ -411,20 +440,14 @@ def create_healthcare_rankings(country='Poland'):
                 html.Img(src=icons_beds,
                          style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
                                 'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
+                dcc.Markdown(children=beds_text, style={'display': 'inline-block'}),
             ]),
         ]),
 
         html.Div([
-            html.Div([
-                html.Img(src=icons_temp,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children='''text about something''', style={'display': 'inline-block'}),
-            ]),
+                dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
         ]),
-
-    ])
+    ], id = 'healthcare_rankings')
     return healthcare_rankings
 
 ############ layout elements ############
@@ -515,10 +538,8 @@ weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig)
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
 polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
 
-
-# show 5 images (icons) with text
-
 healthcare_rankings = create_healthcare_rankings('Poland')
+
 
 ending_markdown_text = '''
 ---
@@ -542,12 +563,10 @@ Broaden your knowledge here:
 '''
 
 ############ layout ############
-
 app.layout = html.Div(style={
     'max-width': '90%',
     'margin': '5% auto',
 },
-
     children=[
         html.Div([
             # Header image with markdown text
@@ -584,18 +603,18 @@ app.layout = html.Div(style={
         html.Div([
             dcc.Markdown(children=ending_markdown_text),
         ]),
-
-        html.Div(
-            [
-                dbc.Button(
-                    "Explore excess deaths interactive map (opens in new tab)",
-                    href="https://www.games4earth.com/excess-deaths-map",
-                    external_link=True,
-                    color="danger",
-                    target="_blank",
-                ),
-            ]
-        )
+        # html.Div(
+        #     [
+        #         dbc.Button(
+        #             "Explore excess deaths interactive map (opens in new tab)",
+        #             href="https://www.games4earth.com/excess-deaths-map",
+        #             external_link=True,
+        #             color="danger",
+        #             target="_blank",
+        #             style={'padding: 10px 10px 10px 10px'}
+        #         ),
+        #     ]
+        # )
     ]
 )
 
@@ -606,6 +625,7 @@ app.layout = html.Div(style={
     Output("message_what_if_deaths", "children"),
     Output("weekly_charts", "figure"),
     Output("polices_charts", "figure"),
+    Output("healthcare_rankings", "children"),
     Input("dropdown", "value"),
 )
 # callback method, updates all charts in the UI
@@ -625,8 +645,9 @@ def update_bar_chart(country):
 
     weekly_charts_fig = df_visualization_weekly_short(df_weekly, country=country)
     polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country=country)
+    healthcare_rankings = create_healthcare_rankings(country=country)
 
-    return excess_deaths_chart_fig, message_excess_deaths, message_what_if_deaths, weekly_charts_fig, polices_fig
+    return excess_deaths_chart_fig, message_excess_deaths, message_what_if_deaths, weekly_charts_fig, polices_fig, healthcare_rankings
 
 
 if __name__ == "__main__":
