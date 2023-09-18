@@ -134,12 +134,12 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
 
     datasource_note = f"data sources/read more: {links}"
     if total_excess_deaths > total_official_covid_deaths:
-        lower_higher = f"The excess deaths were {total_excess_deaths / total_official_covid_deaths:.2f} times higher_lower than expected."
+        lower_higher = f"The excess deaths were {total_excess_deaths / total_official_covid_deaths:.2f} times higher than expected."
     else:
         lower_higher = f""
 
     message = f"{country} experienced {(total_excess_deaths / 1000).round(0).astype(int)}k  excess deaths during the 'Covid years' (2020-2022) " \
-              f"compared to previous years, with only {(total_official_covid_deaths / 1000).round(0).astype(int)}k officially attributed to coronavirus." \
+              f"compared to previous years, with only {(total_official_covid_deaths / 1000).round(0).astype(int)}k officially attributed to coronavirus. " \
               + lower_higher
 
     return df, message, datasource_note
@@ -490,7 +490,7 @@ message_excess_deaths_text = html.Div([
 what_if_deaths, excess_deaths_in_selected_country = get_what_if_deaths(covid2, default_country,
                                                                        country_to_compare='Sweden')
 
-message_excess_deaths = f"If {default_country} had the same excess deaths percent as Sweden (the best in Europe), " \
+message_excess_deaths = f"If {default_country} had the same excess deaths per cent as Sweden (the best in Europe), " \
                         f"it would have lost {what_if_deaths} people, not {excess_deaths_in_selected_country}. "
 message_what_if_deaths = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="message_what_if_deaths"),
