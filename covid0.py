@@ -1,17 +1,11 @@
-import pandas as pd
-from plotly.subplots import make_subplots
-import plotly.express as px
-import plotly.graph_objects as go
-
-import numpy as np
-from dash import Dash, dcc, html, Input, Output
+import os
 
 import dash_bootstrap_components as dbc
-
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
-
-import geopandas as gpd
-import os
+from plotly.subplots import make_subplots
 
 ############style############:
 # DARK SIDE
@@ -58,13 +52,14 @@ current_directory = os.path.dirname(__file__)
 # csv_file_path = os.path.join(current_directory, relative_path_to_csv)
 df_path = os.path.join(current_directory, 'data/output_data/eu_countries/df_yearly.csv')
 df = pd.read_csv(df_path)
-gdf = gpd.read_file(os.path.join(current_directory, "data/eu.geojson"))
+
 covid2 = pd.read_csv(os.path.join(current_directory, 'data/output_data/covid2.csv'))
-gdf2 = gdf.merge(covid2, left_on='NAME', right_on='country', how='left')
+
 ranking_list = list(zip(covid2.ranking, covid2.country))
 xy_ranking = pd.read_csv(os.path.join(current_directory, 'data/gdf_ranking.csv'))
 covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_merged.csv"))
-my_eurostat_healthcare_ranking = pd.read_csv(os.path.join(current_directory, 'data/my_eurostats_healthcare_ranking.csv'))
+my_eurostat_healthcare_ranking = pd.read_csv(
+    os.path.join(current_directory, 'data/my_eurostats_healthcare_ranking.csv'))
 
 df_weekly = pd.read_csv(
     os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_mine_and_other_sources.csv"))
@@ -168,47 +163,6 @@ def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, l
     return fig
 
 
-# create map with excess deaths per country
-def create_map(mapbox_style=mapbox_style):
-    fig = px.choropleth_mapbox(gdf2,
-                               geojson=gdf2.geometry,
-                               locations=gdf2.index,
-                               color='excess deaths in % (2020-2022)',
-                               color_continuous_scale='Viridis_r',  # 'Inferno_r',
-                               center={"lat": 50, "lon": 10},
-                               mapbox_style=mapbox_style,
-                               opacity=0.63,
-                               zoom=3.7,
-                               title="coronavirus ranking (by excess deaths in % - 2020-2022)",
-
-                               hover_name='ranking',
-                               hover_data={'country': False,
-                                           'deaths (2020-2022)': ':,',  # ':.1f', 'deaths (2016-2019)': '.1f',
-                                           'average deaths (2016-2019)': ':,',  # '.1f',
-                                           'expected deaths (2020-2022)': ':,',  # '.1f',
-                                           'excess deaths (2020-2022)': ':,',  # '.1f',
-                                           'excess deaths in % (2020-2022)': True,  # '.1f',
-                                           'ranking': False,  #
-                                           })
-
-    fig.update_layout(
-        plot_bgcolor='rgba(1,1,1,1)', title_x=0.5, title_y=0.97,
-        font=dict(color="white"),
-        coloraxis_colorbar=dict(
-            title="excess <br>deaths <br>in %",
-            thicknessmode="pixels", thickness=20
-        ),
-        margin={"r": 20, "t": 20, "l": 20, "b": 20},
-        paper_bgcolor='rgba(0,0,0,1)', showlegend=False,
-        # set legend location = 'top left',
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        height=500
-    )
-
-    fig.update_traces(marker_line_color='white', marker_line_width=1)
-    return fig
-
-
 def create_covid_excess_deaths(covid2):
     title = "<b>Deadly Choices - Coronavirus Ranking</b>" \
             "<br>232,000 more Polish people died from 2020 to 2022 than we would have expected based on the average from 2016 to 2019." \
@@ -255,7 +209,8 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     df = df_weekly[df_weekly['location'] == country]
     columns_to_plot = ['weekly deaths', 'excess deaths']
     vaccination_columns = ['vacination rate']
-    google_columns = ['workplaces'] #['retail and recreation', 'grocery and pharmacy', 'residential', 'transit stations', 'workplaces']
+    google_columns = [
+        'workplaces']  # ['retail and recreation', 'grocery and pharmacy', 'residential', 'transit stations', 'workplaces']
 
     fig = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.042,
                         subplot_titles=("weekly deaths", "weekly cases",
@@ -377,6 +332,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
 
     return fig
 
+
 def create_healthcare_rankings(country='Poland'):
     df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
     intro_text = f'''#####  Following data represents a state of healthcare system in {country} among other countries in this ranking:'''
@@ -387,30 +343,30 @@ def create_healthcare_rankings(country='Poland'):
 
     dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
     dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    rank_dr20=df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+    rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
     dr_text = f"Practising physicians in 2021 (per 100K inhabitants): {country} has {rank_dr20}/28 place in ranking. In 2021 it had {dr20} physicians per 100K inhabitant ({dr16} in 2016)."
 
     nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
     nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    rank_nurses20=df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    if country== 'Poland':
+    rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+    if country == 'Poland':
         nurses_text = f"Practising nurses in 2017 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2017 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015). Note: Eurostat has data for Poland only for 2017, while for other countries for 2020."
     else:
         nurses_text = f"Practising nurses in 2020 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2020 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015)."
 
-    beds09=df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
-    beds19= df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    rank_beds19=df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+    beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
+    beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+    rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
     beds_text = f"Curative care beds in hospitals in 2019 (per 100K inhabitants): {country} has {rank_beds19}/28 place in ranking. In 2019 it had {beds19} beds per 100K inhabitant ({beds09} in 2009)."
 
-    if country=='Poland':
+    if country == 'Poland':
         temporary_beds = '''###### Moreover, according to Supreme Audit Office: "Temporary hospitals in Poland were built in Poland since October 2020 on a scale unseen in Europe, without any plan or reliable analysis of the epidemiological situation or availability of medical staff, and also without any cost calculation – NIK established. According to the Polish SAI over PLN 612.6 million was spent ineffectively and without purpose on the creation, functioning and liquidation of temporary hospitals located in large-format buildings." [NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)'''
     else:
         temporary_beds = ''
 
     healthcare_rankings = html.Div([
         html.Div([dcc.Markdown(children=['''---''', intro_text]),
-        ]),
+                  ]),
 
         html.Div([
             html.Div([
@@ -449,7 +405,7 @@ def create_healthcare_rankings(country='Poland'):
         ]),
 
         html.Div([
-                dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
+            dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
         ]),
 
         html.Div([
@@ -458,8 +414,9 @@ def create_healthcare_rankings(country='Poland'):
                 children=['''Note: Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)''']),
         ]),
 
-    ], id = 'healthcare_rankings')
+    ], id='healthcare_rankings')
     return healthcare_rankings
+
 
 ############ layout elements ############
 default_country = 'Poland'
@@ -487,11 +444,6 @@ covid_ranking_fig, covid_ranking_title = create_covid_excess_deaths(covid2)
 covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
                           style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
                           config={'staticPlot': True})
-
-excess_deaths_map_fig = create_map()
-excess_deaths_map = dcc.Graph(id='excess_deaths_map', figure=excess_deaths_map_fig,
-                              style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
-                              config={'staticPlot': True})
 
 # header_map_fig = render_image_map()
 # header_map = dcc.Graph(id='header_map', figure=header_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
@@ -529,7 +481,8 @@ excess_deaths_chart_fig = create_what_if_deaths_plot(excess_deaths_chart_df, def
 excess_deaths_chart_fig.update_layout(plot_bgcolor=colors['background'], paper_bgcolor=colors['background'],
                                       font_color=colors['text'])
 
-excess_deaths_explanation = dcc.Graph(id='excess_deaths_explanation_graph', figure=excess_deaths_chart_fig)
+excess_deaths_explanation = dcc.Graph(id='excess_deaths_explanation_graph', figure=excess_deaths_chart_fig,
+                                      config={'staticPlot': True})
 
 message_excess_deaths_text = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="excess_deaths_message"),
@@ -555,7 +508,6 @@ polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country
 polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': False})
 
 healthcare_rankings = create_healthcare_rankings('Poland')
-
 
 ending_markdown_text = '''
 ---
@@ -620,14 +572,14 @@ app.layout = html.Div(style={
         # add a div with dbc button to redirect to another website:
         html.Div([
             # dcc.Markdown(children='''---'''),
-            html.Div([  dbc.Button("Explore excess deaths interactive map (opens in new tab)", color="danger",
-                                   href="https://www.games4earth.com/excess-deaths-map", target="_blank")
-                ]),
-            ]),
+            html.Div([dbc.Button("Explore excess deaths interactive map (opens in new tab)", color="danger",
+                                 href="https://www.games4earth.com/excess-deaths-map", target="_blank")
+                      ]),
+        ]),
 
         html.Div([dcc.Markdown(children='''---'''),
-                             dbc.Button("back to top", color="warning",
-                                 href="#dropdown", external_link=False,
+                  dbc.Button("back to top", color="warning",
+                             href="#dropdown", external_link=False,
                              style={'padding': '5px 5px 5px 5px'})
                   #     ,
                   # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
@@ -637,9 +589,9 @@ app.layout = html.Div(style={
             dcc.Markdown(children=ending_markdown_text),
         ]),
 
-
     ]
 )
+
 
 ########## callbacks ##########
 @app.callback(
