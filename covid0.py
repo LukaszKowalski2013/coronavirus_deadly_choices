@@ -458,19 +458,18 @@ header_markdown_text = '''# Deadly Choices - Coronavirus Ranking
 '''
 
 intro_markdown_text = '''
-During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
-The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
+During the pandemic, it became clear, that our decisions impact the lives of other human beings and that we are all connected. 
+The analysis and ranking are based on excess death statistics since it is the most comparable one across countries 
 and it is more reliable than the number of deaths officially attributed to coronavirus (Eurostat 2023; link below).
-Excess deaths here are deaths from all causes in the COVID-19 period above deaths before the coronavirus pandemic (2016-2019). The higher the value, the more additional deaths. If the value is negative, it means that there were fewer deaths than in the 'normal period'. This measure is far more comparative than deaths officially attributed to coronavirus for many reasons: hospitals reported coronavirus deaths differently (there might be some incentives to classify someone as a "covid patient), the virus could be one of many reasons why someone died or deaths may be related to country's restrictions (e.g. patient may skip some diagnosis, hospitals were not accepting as many patients as usual).
+Excess deaths here are deaths from all causes in the COVID-19 period above the average of deaths before the coronavirus pandemic (2016-2019). The higher the value, the more additional deaths. If the value is negative, it means that there were fewer deaths than in the 'normal period'. This measure is far more comparative than deaths officially attributed to coronavirus for many reasons: hospitals reported coronavirus deaths differently (there might be some incentives to classify someone as a "covid patient), the virus could be one of many reasons why someone died or deaths may be related to country's restrictions (e.g. patient may skip some diagnosis, hospitals were not accepting as many patients as usual).
 
-The long-term effects of the pandemic on excess are yet unknown, but the ranking that I created should be a guideline on how we performed, and how the decisions of our countries impacted the lives of our families. I hope it will help us make proper decisions in life during the next pandemic and future elections.
+The long-term effects of the pandemic on excess deaths statistics are yet unknown, but the ranking that I created should be a guideline on how we performed, and how the decisions of our governments impacted the lives of our families. The ranking unveils a bitter story. Personally, I lost two grandmothers and my father during the pandemic, ranking shows that Poland was one of the worst countries to live in. Moreover, it makes me mad that, according to the Supreme Audit Office, the government in Poland spent 600M PLN on unnecessary temporary hospitals that were not used and only 400M for needed healthcare services (link below). The reasons why we lost are much more profound - Poland has one of the worst healthcare statistics in Europe and this has not changed a lot during recent years. I hope that this ranking will help us make proper decisions in life during the next pandemic and future elections.
 
-##### Coronavirus ranking: the worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more then 19% of excess deaths during 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower then 7%.
-'''
+##### Coronavirus ranking: the worst countries to live in during the coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more than 19% excess deaths during the 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower than 7%. Many questions need to be answered: were the lockdowns, restrictions on movement and gathering the right decision, how vaccinations impact excess deaths, what was the role of geography, our culture & trust in the results, what the statistics cannot tell us... and why Sweden, with its controversial&liberal strategy, won?'''
 
 intro_markdown_text2 = '''
 ---
-# Choose a country, to explore how it dealt with coronavirus pandemic: 
+## Choose a country, to explore how it dealt with coronavirus pandemic: 
 '''
 
 excess_deaths_chart_df, message_excess_deaths, datasource_note = create_what_if_deaths_explanation(df,
@@ -527,7 +526,10 @@ Healthcare Healthcare images [designed by macrovector / Freepik](http://www.free
 
 Broaden your knowledge here:
 - [Eurostat article on excess deaths in EU between 2020 and 2023](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)
+- [Ineffective management of the COVID-19 pandemic in Poland - press conference at NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)
 - Thomas Hale, Noam Angrist, Rafael Goldszmidt, Beatriz Kira, Anna Petherick, Toby Phillips, Samuel Webster, Emily Cameron-Blake, Laura Hallas, Saptarshi Majumdar, and Helen Tatlow. (2021). “A global panel database of pandemic policies (Oxford COVID-19 Government Response Tracker).” Nature Human Behaviour. https://doi.org/10.1038/s41562-021-01079-8
+- [COVID-19 w Polsce – na początku był chaos (in Polish)](https://www.nik.gov.pl/aktualnosci/covid-19-w-polsce.html)
+- [9 mld złotych na dodatki covidowe – poza kontrolą Ministra Zdrowia i NFZ (in Polish)](https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)
 '''
 
 ############ layout ############
