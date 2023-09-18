@@ -35,6 +35,8 @@ my_dbc_style = dbc.themes.MATERIA
 colors = {
     'background': '#FFFFFF',  # white
     'text': '#111111',
+    'official_covid': '#c12900',
+    'excess_deaths': '#6b1ea4'
 }
 dropdown_button_color = '#e8393f'
 what_if_colors = ('#b1b1b1', '#8b8b8b', '#e8393f')  # grey, dark grey, red
@@ -253,13 +255,13 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     df = df_weekly[df_weekly['location'] == country]
     columns_to_plot = ['weekly deaths', 'excess deaths']
     vaccination_columns = ['vacination rate']
-    google_columns = ['retail and recreation', 'grocery and pharmacy', 'residential', 'transit stations', 'workplaces']
+    google_columns = ['workplaces'] #['retail and recreation', 'grocery and pharmacy', 'residential', 'transit stations', 'workplaces']
 
     fig = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.042,
                         subplot_titles=("weekly deaths", "weekly cases",
                                         "vaccination rate (% of total population)",
                                         "Government Response Index Average",
-                                        "google mobility change (by activity type)"
+                                        "Google mobility in workplaces"
                                         ))
     # hide title 'Subplots'
     fig.update_layout(title_text='')
@@ -270,11 +272,13 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     # add annotation with arrows that indicate "excess deaths" and "weekly deaths"
     fig.add_annotation(x=df['date'].iloc[50], y=df['weekly deaths'].iloc[50],
                        # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
-                       text="official coronavirus deaths", showarrow=True, arrowhead=1, font=dict(color=colors['text']))
+                       text="official coronavirus deaths", showarrow=True, arrowhead=1,
+                       font=dict(color=colors['official_covid']),
+                       )
     fig.add_annotation(x=df['date'].iloc[100], y=df['excess deaths'].iloc[100],
                        # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
-                       text="excess deaths (week-to-week)", showarrow=True, arrowhead=1,
-                       font=dict(color=colors['text']))
+                       text="excess deaths", showarrow=True, arrowhead=1,
+                       font=dict(color=colors['excess_deaths']))
 
     fig.add_trace(go.Scatter(x=df['date'], y=df['weekly cases'], name='weekly cases', showlegend=False), row=2, col=1)
     for i, column in enumerate(vaccination_columns):
@@ -294,9 +298,10 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
                      showgrid=False)
     fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
 
-    fig.update_layout(height=700, showlegend=True,
-                      legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1,
-                                  bgcolor='rgba(0,0,0,0.23)'),
+    fig.update_layout(height=700,
+                      showlegend=False,
+                      # legend=dict(orientation="h", yanchor="bottom", y=0, xanchor="right", x=1,
+                      #             bgcolor='rgba(0,0,0,0.23)'),
                       plot_bgcolor=colors['background'], paper_bgcolor=almost_black, font_color=colors['text']),
     # legend_bgcolor=almost_black)
     # change padding between subplots
@@ -344,7 +349,6 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
                                    arrowcolor=sparkline_arrow_color,
                                    font=dict(color=sparkline_annotation_text_color),
                                    yanchor="top", xshift=3)
-
         if variable == 'Workplace closing':
             fig.append_trace(go.Scatter(
                 x=covid['date'],
@@ -369,7 +373,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     fig.update_layout(height=300, showlegend=False,  # show_title=False, # title_text=f'policy response in {country}',
                       plot_bgcolor=colors['background'], paper_bgcolor=almost_black, font_color=colors['text'])
     # change padding between subplots
-    fig.update_layout(margin=dict(l=20, r=20, t=20, b=20), height=400)
+    fig.update_layout(margin=dict(l=42, r=20, t=20, b=20), height=500)
 
     return fig
 
@@ -447,6 +451,13 @@ def create_healthcare_rankings(country='Poland'):
         html.Div([
                 dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
         ]),
+
+        html.Div([
+            # Header image with markdown text
+            dcc.Markdown(
+                children=['''Note: Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)''']),
+        ]),
+
     ], id = 'healthcare_rankings')
     return healthcare_rankings
 
@@ -474,11 +485,13 @@ dropdown_country = dcc.Dropdown(
 
 covid_ranking_fig, covid_ranking_title = create_covid_excess_deaths(covid2)
 covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
-                          style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
+                          style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
+                          config={'staticPlot': True})
 
 excess_deaths_map_fig = create_map()
 excess_deaths_map = dcc.Graph(id='excess_deaths_map', figure=excess_deaths_map_fig,
-                              style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
+                              style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
+                              config={'staticPlot': True})
 
 # header_map_fig = render_image_map()
 # header_map = dcc.Graph(id='header_map', figure=header_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
@@ -495,9 +508,12 @@ header_markdown_text = '''# Deadly Choices - Coronavirus Ranking
 intro_markdown_text = '''
 During pandemic it became clear, that our decisions impact lives of other human being and that we are all connected. 
 The analysis and ranking are based on excess death statistics, since it is the most comparable one across countries 
-and it is more reliable than the number of deaths officially attributed to coronavirus ([read Eurostat article about excess deaths](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)).
+and it is more reliable than the number of deaths officially attributed to coronavirus (Eurostat 2023; link below).
+Excess deaths here are deaths from all causes in the COVID-19 period above deaths before the coronavirus pandemic (2016-2019). The higher the value, the more additional deaths. If the value is negative, it means that there were fewer deaths than in the 'normal period'. This measure is far more comparative than deaths officially attributed to coronavirus for many reasons: hospitals reported coronavirus deaths differently (there might be some incentives to classify someone as a "covid patient), the virus could be one of many reasons why someone died or deaths may be related to country's restrictions (e.g. patient may skip some diagnosis, hospitals were not accepting as many patients as usual).
 
-The worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more then 19% of excess deaths during 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower then 7%.
+The long-term effects of the pandemic on excess are yet unknown, but the ranking that I created should be a guideline on how we performed, and how the decisions of our countries impacted the lives of our families. I hope it will help us make proper decisions in life during the next pandemic and future elections.
+
+##### Coronavirus ranking: the worst countries to live in during coronavirus pandemic were Bulgaria, Cyprus, Poland, Romania and Slovakia - there were more then 19% of excess deaths during 2020-2022 period. On the other side of the ranking are: Denmark, Finland, Iceland, Norway and Sweden, with excess deaths lower then 7%.
 '''
 
 intro_markdown_text2 = '''
@@ -533,10 +549,10 @@ Explore how coronavirus pandemic unfolded on weekly basis in the selected countr
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
-weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig)
+weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': False})
 
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
-polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig)
+polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': False})
 
 healthcare_rankings = create_healthcare_rankings('Poland')
 
@@ -555,7 +571,7 @@ Charts and maps were created based on following data sources:
 - Healthcare resource statistics - beds [Eurostat-5](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_resource_statistics_-_beds#Hospital_beds)
 - Temporary COVID-19 Hospitals [NIK](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
 
-Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)
+Healthcare Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)
 
 Broaden your knowledge here:
 - [Eurostat article on excess deaths in EU between 2020 and 2023](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)
@@ -567,6 +583,7 @@ app.layout = html.Div(style={
     'max-width': '90%',
     'margin': '5% auto',
 },
+
     children=[
         html.Div([
             # Header image with markdown text
