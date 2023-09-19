@@ -42,9 +42,13 @@ sparkline_annotation_text_color = "#1ea226"
 sparkline_arrow_color = "#1ea226"
 plotly_template = "plotly_white"
 
-############data############:
-app = Dash(__name__, external_stylesheets=[my_dbc_style])
+######## app start
+app = Dash(__name__, external_stylesheets=[my_dbc_style],
+           meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 server = app.server
+
+
+############data############:
 
 # Get the current directory (root of your GitHub repository)
 current_directory = os.path.dirname(__file__)
@@ -501,10 +505,10 @@ Explore how coronavirus pandemic unfolded on weekly basis in the selected countr
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
-weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': False})
+weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': True})
 
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
-polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': False})
+polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': True})
 
 healthcare_rankings = create_healthcare_rankings('Poland')
 
@@ -532,6 +536,7 @@ Broaden your knowledge here:
 - [9 mld złotych na dodatki covidowe – poza kontrolą Ministra Zdrowia i NFZ (in Polish)](https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)
 '''
 
+dbc.Row(dbc.Col(html.Div("A single column"))),
 ############ layout ############
 app.layout = html.Div(style={
     'max-width': '90%',
@@ -593,6 +598,9 @@ app.layout = html.Div(style={
 
     ]
 )
+# dbc.Row(dbc.Col(
+# )
+# )
 
 
 ########## callbacks ##########
