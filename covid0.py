@@ -615,7 +615,7 @@ app.layout = html.Div(style={
                     dcc.Markdown(children=ending_markdown_text),
                 ]),
                 # my app layout ends here
-            ], xs=10, sm=10, md=5, lg=7, xl=6) #col
+            ], xs=12, sm=11, md=5, lg=7, xl=6) #col
         ], justify="center") #row
 ]
 )
