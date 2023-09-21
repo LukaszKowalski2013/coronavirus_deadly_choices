@@ -160,7 +160,9 @@ def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, l
                   annotation_font=dict(size=17))
 
     fig.update_layout(title_text=f"excess deaths in {country}", title_font_size=17, title_x=0.5, title_y=0.9,
-                      legend=dict(orientation="h"), )  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
+                      legend=dict(orientation="h"),
+                      legend_title_text='',
+                      )  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
     # set this: layout.xaxis.fixedrange: true
     fig.update_xaxes(fixedrange=True)
     fig.update_yaxes(fixedrange=True)
@@ -260,7 +262,7 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False, fixedrange=True)
-    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90)
 
     fig.update_layout(height=700,
                       showlegend=False,
@@ -330,7 +332,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False, fixedrange=True)
-    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear', )
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90, tickmode='linear', )
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
 

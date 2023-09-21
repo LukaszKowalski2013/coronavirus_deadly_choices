@@ -55,7 +55,7 @@ df = pd.read_csv(df_path)
 
 covid2 = pd.read_csv(os.path.join(current_directory, 'data/output_data/covid2.csv'))
 
-ranking_list = list(zip(covid2.ranking, covid2.country))
+ranking_list = list(zip(covid2.ranking_pl, covid2.country))
 xy_ranking = pd.read_csv(os.path.join(current_directory, 'data/gdf_ranking.csv'))
 covid_deaths = pd.read_csv(os.path.join(current_directory, "data/output_data/_selected_eu/df_weekly_merged.csv"))
 my_eurostat_healthcare_ranking = pd.read_csv(
@@ -75,6 +75,10 @@ icons_temp = 'https://drive.google.com/uc?export=view&id=1IxQa7Lwn6dPKiszMTPhpyM
 ############ methods ############:
 polices = pd.read_csv(os.path.join(current_directory, "data/output_data/polices.csv"))
 
+def get_country_in_Polish(country):
+    my_dict = {'Sweden': 'Szwecja', 'Norway': 'Norwegia', 'Denmark': 'Dania', 'Luxembourg': 'Luksemburg', 'Ireland': 'Irlandia', 'Belgium': 'Belgia', 'Finland': 'Finlandia', 'Germany': 'Niemcy', 'Latvia': 'Łotwa', 'France': 'Francja', 'Switzerland': 'Szwajcaria', 'Hungary': 'Węgry', 'Austria': 'Austria', 'Estonia': 'Estonia', 'Lithuania': 'Litwa', 'Portugal': 'Portugalia', 'Netherlands': 'Holandia', 'Spain': 'Hiszpania', 'Croatia': 'Chorwacja', 'Italy': 'Włochy', 'Greece': 'Grecja', 'Slovenia': 'Słowenia', 'Romania': 'Rumunia', 'Czechia': 'Czechy', 'Malta': 'Malta', 'Slovakia': 'Słowacja', 'Poland': 'Polska', 'Cyprus': 'Cypr', 'Bulgaria': 'Bułgaria'}
+
+    return my_dict[country]
 
 def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     expected_deaths = covid_df.loc[covid_df['country'] == country, 'expected deaths (2020-2022)'].values[0]
@@ -109,15 +113,15 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
     dfy = dfy.loc[dfy.country == country].copy()
     # only data > 2016 <= 2019
     dfy = dfy.loc[(dfy.year <= 2022) & (dfy.year >= 2016)]
-    dfy['description'] = 'deaths before covid years'  # different messages
+    dfy['description'] = 'zgony przed pandemią'  # different messages
     dfy_av = dfy.loc[(dfy.year <= 2019) & (dfy.year >= 2016)]
     dfy_av = dfy_av[['country', 'year', 'deaths', 'description']]
     dfy_below = dfy.loc[(dfy.year >= 2020)].copy()
     dfy_above = dfy.loc[(dfy.year >= 2020)].copy()
-    dfy_below['description'] = 'deaths below 2016-2019 average'
+    dfy_below['description'] = 'zgony poniżej średniej 2016-2019'
     dfy_below['deaths'] = dfy_below['avg_deaths']
 
-    dfy_above['description'] = 'excess deaths (above 2016-2019 average)'
+    dfy_above['description'] = 'nadwyżka zgonów (powyżej średniej 2016-2019)'
     dfy_above['deaths'] = dfy_above['excess_deaths']
 
     df = pd.concat([dfy_av, dfy_below, dfy_above])
@@ -138,8 +142,8 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
     else:
         lower_higher = f""
 
-    message = (f"{country} doświadczyło nadwyżki zgonów wynoszącej {(total_excess_deaths / 1000).round(0).astype(int)} tys. "
-               f"podczas lat 'Covid' (2020-2022) w porównaniu z poprzednimi latami, "
+    message = (f"Nadwyżka zgonów w tym kraju wyniosła: {(total_excess_deaths / 1000).round(0).astype(int)} tys. "
+               f"podczas pandemi Covid-19 (2020-2022) w porównaniu z poprzednimi latami, "
                f"z czego tylko {(total_official_covid_deaths / 1000).round(0).astype(int)} tys. zostało oficjalnie "
                f"przypisanych koronawirusowi.") + lower_higher
 
@@ -156,22 +160,25 @@ def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, l
     fig.add_hline(y=df['avg_deaths'].mean(), line_width=3, line_dash="dash", line_color=what_if_average_color,
                   annotation_text="średnia liczba zgonów: 2016-2019", annotation_position="top left",  # "bottom left"
                   annotation_font=dict(size=17))
-
-    fig.update_layout(title_text=f"nadwyżka zgonów: {country}", title_font_size=17, title_x=0.5, title_y=0.9,
-                      legend=dict(orientation="h"))  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
+    pl_country = get_country_in_Polish(country)
+    fig.update_layout(title_text=f"nadwyżka zgonów: {pl_country}", title_font_size=17, title_x=0.5, title_y=0.9,
+                      legend=dict(orientation="h"),
+                      #hide legend title
+                        legend_title_text='',
+                      )  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
 
     # fig.write_html("test.html", auto_open=True)
     return fig
 
 
 def create_covid_excess_deaths(covid2):
-    title = "Śmiertelne Wybory - Ranking Koronawirusa"\
+    title = "Śmiertelne Wybory - Ranking krajów"\
             "<br>Od 2020 do 2022 roku zmarło 232 000 więcej Polaków niż można by się spodziewać na podstawie średniej z lat 2016-2019."\
             "<br>Nasza narodowa sytuacja związana z pandemią była jedną z najgorszych w Europie."\
             "<br><br><b>Ile Polaków zmarłoby, gdybyśmy byli innym krajem?</b>"
 
     fig = px.bar(covid2, x='excess deaths in % (2020-2022)',
-                 y="ranking",
+                 y="ranking_pl",
                  color='excess deaths in % (2020-2022)',
                  color_continuous_scale='Viridis_r',  # 'Inferno_r', color_discrete_sequence=colors, #["#a31212"],
                  hover_data={'country': False,
@@ -183,7 +190,7 @@ def create_covid_excess_deaths(covid2):
                              # 'what if deaths': ':,', # '.1f',
                              'ranking': False,  #
                              },
-                 hover_name='ranking',
+                 hover_name='ranking_pl',
                  orientation='h',
                  # custom title for x axis:
                     labels={'excess deaths in % (2020-2022)': 'nadwyżka zgonów w % (2020-2022)'},
@@ -200,6 +207,8 @@ def create_covid_excess_deaths(covid2):
             title="Nadwyżka zgonów w %<br> (2020-2022)",
             thicknessmode="pixels", thickness=20,
         ),
+        #change label for y axis:
+        yaxis_title="ranking",
     )
 
     fig.update_coloraxes(showscale=False)
@@ -218,7 +227,7 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.042,
                         subplot_titles=('zgony (wg tygodni)', 'zakażenia (wg tygodni)',
                                         '% zaszczepionej populacji',
-                                        'indeks reakcji rządu (Oxford)', 'mobilność w miejscu pracy (Google)'))
+                                        'indeks reakcji rządu (Oxford COVID-19 Government Response Tracker)', 'mobilność w miejscu pracy (Google)'))
 
     # hide title 'Subplots'
     fig.update_layout(title_text='')
@@ -229,12 +238,12 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     # add annotation with arrows that indicate "excess deaths" and "weekly deaths"
     fig.add_annotation(x=df['date'].iloc[50], y=df['weekly deaths'].iloc[50],
                        # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
-                       text="official coronavirus deaths", showarrow=True, arrowhead=1,
+                       text="oficjalne zgony covidowe", showarrow=True, arrowhead=1,
                        font=dict(color=colors['official_covid']),
                        )
     fig.add_annotation(x=df['date'].iloc[100], y=df['excess deaths'].iloc[100],
                        # arrowcolor="#a6a6a6", #todo check if it is OK in dark mode
-                       text="excess deaths", showarrow=True, arrowhead=1,
+                       text="nadwyżka zgonów", showarrow=True, arrowhead=1,
                        font=dict(color=colors['excess_deaths']))
 
     fig.add_trace(go.Scatter(x=df['date'], y=df['weekly cases'], name='weekly cases', showlegend=False), row=2, col=1)
@@ -253,7 +262,7 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90)
 
     fig.update_layout(height=700,
                       showlegend=False,
@@ -273,10 +282,12 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     covid = df.copy()
     covid = covid.loc[covid['country'] == country].copy()
     # change all values to 0 or 1
-
+    polish_titles = ('Zamknięcia szkół', 'Zamknięcia miejsc pracy', 'Odwołania wydarzeń publicznych',
+                     'Ograniczenia w zgromadzeniach', 'Zalecenia pozostania w domu',
+                     'Ograniczenia w ruchu wewnętrznym')
     fig = make_subplots(rows=len(all_indices), cols=1, shared_xaxes=True,
 
-                        subplot_titles=all_indices, vertical_spacing=0.1)
+                        subplot_titles=polish_titles, vertical_spacing=0.1)
     row = 1
     for variable in all_indices:
         fig.append_trace(go.Scatter(
@@ -285,7 +296,8 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
             line=dict(width=1, color=color),
             name=variable,
         ), row=row, col=1)
-        fig.layout.annotations[row - 1].update(text=f'{variable} ({covid[variable].count()})')
+        var_pl = polish_titles[row - 1]
+        fig.layout.annotations[row - 1].update(text=f'{var_pl} ({covid[variable].count()})')
         if variable == 'School closing':
             fig.append_trace(go.Scatter(
                 x=covid['date'],
@@ -295,14 +307,14 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
                 line=dict(width=5, color=color)
             ), row=row, col=1)
             days = covid[variable].count() + covid["All School closing"].count()
-            fig.layout.annotations[row - 1].update(text=f'All/selected schools closing ({days} days)')
+            fig.layout.annotations[row - 1].update(text=f'Wszystkie/wybrane - zamknięcia szkół ({days} dni)')
             # add annotation with arrow that indicate "All School closing"
 
             if covid['All School closing'].notnull().values.any():
                 first_index = covid['All School closing'].first_valid_index()
                 first_index = covid['All School closing'].index.get_loc(first_index)
                 fig.add_annotation(x=covid['date'].iloc[first_index], y=covid['All School closing'].iloc[first_index],
-                                   text="All", showarrow=True, arrowhead=1, arrowwidth=2,
+                                   text="wszystkie", showarrow=True, arrowhead=1, arrowwidth=2,
                                    arrowcolor=sparkline_arrow_color,
                                    font=dict(color=sparkline_annotation_text_color),
                                    yanchor="top", xshift=3)
@@ -315,7 +327,7 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
                 line=dict(width=5, color=color),
             ), row=row, col=1)
             days = covid[variable].count() + covid["All Workplace closing"].count()
-            fig.layout.annotations[row - 1].update(text=f'All/selected workplaces closing ({days})')
+            fig.layout.annotations[row - 1].update(text=f'Wszystkie/wybrane - zamknięcia miejsc pracy ({days})')
         row += 1
 
     # fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
@@ -323,7 +335,8 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
                      showgrid=False)
-    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear', )
+    fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90, tickmode='linear')
+
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
 
@@ -332,36 +345,39 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
     # change padding between subplots
     fig.update_layout(margin=dict(l=42, r=20, t=20, b=20), height=500)
 
+
     return fig
 
 
 def create_healthcare_rankings(country='Poland'):
+    pl_country = get_country_in_Polish(country)
+    
     df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
-    intro_text = f'''##### Poniższe dane przedstawiają stan systemu opieki zdrowotnej w {country} w porównaniu do innych krajów w tym rankingu:'''
+    intro_text = f'''##### {pl_country}. Poniższe dane przedstawiają stan systemu opieki zdrowotnej w porównaniu do innych krajów w tym rankingu:'''
     ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
     money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
     money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
-    money_text = f"Wydatki na opiekę zdrowotną w 2020 roku w euro (na mieszkańca): {country} zajmuje {ranks_money}/28 miejsce w rankingu. W 2020 roku wydano {money_data} euro na mieszkańca ({money_old_data} w 2012 roku)."
+    money_text = f"**Wydatki na opiekę zdrowotną w 2020 roku w euro (na mieszkańca):** {pl_country} - {ranks_money}/28 miejsce w rankingu. W 2020 roku wydano {money_data} euro na mieszkańca ({money_old_data} w 2012 roku)."
     dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
     dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
     rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    dr_text = f"Lekarze praktykujący w 2021 roku (na 100 tys. mieszkańców): {country} zajmuje {rank_dr20}/28 miejsce w rankingu. W 2021 roku miało {dr20} lekarzy na 100 tys. mieszkańców ({dr16} w 2016 roku)."
+    dr_text = f"**Lekarze praktykujący w 2021 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_dr20}/28 miejsce w rankingu. W 2021 roku miało {dr20} lekarzy na 100 tys. mieszkańców ({dr16} w 2016 roku)."
 
     nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
     nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
     rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
     if country == 'Poland':
-        nurses_text = f"Pielęgniarki praktykujące w 2017 roku (na 100 tys. mieszkańców): {country} zajmuje {rank_nurses20}/28 miejsce w rankingu. W 2017 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku). Nota: Eurostat ma dane tylko dla Polski z roku 2017, podczas gdy dla innych krajów z roku 2020."
+        nurses_text = f"**Pielęgniarki praktykujące w 2017 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2017 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku). Nota: Eurostat ma dane tylko dla Polski z roku 2017, podczas gdy dla innych krajów z roku 2020."
     else:
-        nurses_text = "Pielęgniarki praktykujące w 2020 roku (na 100 tys. mieszkańców): {country} zajmuje {rank_nurses20}/28 miejsce w rankingu. W 2020 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku)."
+        nurses_text = f"**Pielęgniarki praktykujące w 2020 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2020 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku)."
 
     beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
     beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
     rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    beds_text = f"Łóżka w szpitalach w 2019 roku (na 100 tys. mieszkańców): {country} zajmuje {rank_beds19}/28 miejsce w rankingu. W 2019 roku miało {beds19} łóżek na 100 tys. mieszkańców ({beds09} w 2009 roku)."
+    beds_text = f"**Łóżka w szpitalach w 2019 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_beds19}/28 miejsce w rankingu. W 2019 roku miało {beds19} łóżek na 100 tys. mieszkańców ({beds09} w 2009 roku)."
 
     if country == 'Poland':
-        temporary_beds = "###### Ponadto, według Najwyższej Izby Kontroli: 'Tymczasowe szpitale w Polsce były budowane od października 2020 roku na niespotykaną w Europie skalę, bez jakiegokolwiek planu lub wiarygodnej analizy sytuacji epidemiologicznej czy dostępności personelu medycznego, a także bez jakiejkolwiek kalkulacji kosztów - ustaliła NIK. Według polskiej NIK, ponad 612,6 miliona złotych zostało wydane nieskutecznie i bezcelowo na tworzenie, funkcjonowanie i likwidację tymczasowych szpitali znajdujących się w budynkach o dużej powierzchni.' NIK"
+        temporary_beds = "###### Ponadto, według Najwyższej Izby Kontroli: 'Szpitale tymczasowe dla chorych na COVID-19 tworzone w Polsce od października 2020 r. na niespotykaną w Europie skalę, powstawały bez żadnego planu, bez rzetelnej analizy danych o sytuacji epidemicznej i dostępności kadr medycznych, a także bez kalkulacji kosztów (...). W efekcie od marca 2020 r. do kwietnia 2022 r. koszty utrzymania gotowości do udzielania świadczeń pacjentom z COVID-19 we wszystkich przystosowanych do tego szpitalach wyniosły ok. 7 mld zł, podczas gdy w tym samym okresie, na faktyczne leczenie pacjentów zakażonych wirusem SARS-COV2 państwo wydało niecałe 5 mld zł.' NIK"
     else:
         temporary_beds = ''
 
@@ -458,12 +474,14 @@ covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
 header_markdown_text = '''# Śmiertelne wybory - koronawirusowy ranking
 '''
 
-intro_markdown_text = '''
-Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie innych ludzi i że wszyscy jesteśmy ze sobą powiązani. Analiza i ranking opierają się na statystykach nadmiernych zgonów, ponieważ jest to najbardziej porównywalne dane między krajami i bardziej wiarygodne niż liczba zgonów oficjalnie przypisanych koronawirusowi (Eurostat 2023; link poniżej). Nadmiar zgonów oznacza tutaj zgony ze wszystkich przyczyn w okresie COVID-19 powyżej średniej zgonów przed pandemią koronawirusa (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w 'normalnym okresie'. Ten miernik jest znacznie bardziej porównawczy niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony z powodu koronawirusa (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. pacjent mógł unikać pewnych diagnoz, szpitale nie przyjmowały tylu pacjentów co zwykle).
+intro_markdown_text = '''Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie innych ludzi i że wszyscy jesteśmy ze sobą powiązani. Poniższa analiza i ranking opierają się na statystyce nadmiernych zgonów w % wszystkich zgonów, ponieważ dla porównań międzynarodowych jest to najbardziej wiarygodna i rzetelna statystyka opisująca śmiertelność podczas pandemii koronawirusa (Eurostat 2023; link poniżej). Nadmiar zgonów oznacza tutaj zgony (niezależnie od przyczyn) w okresie COVID-19 powyżej średniej zgonów przed pandemią (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w okresie 2016-2019. Ten miernik jest znacznie bardziej rzetelny do porównań międzynarodowych niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony koronawirusowe (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. pacjent mógł unikać pewnych diagnoz, szpitale nie przyjmowały tylu pacjentów co zwykle).
 
-Długotrwałe skutki pandemii na statystyki nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, powinien być wytyczną dotyczącą naszej wydajności i wpływu decyzji naszych rządów na życie naszych rodzin. Ranking ujawnia gorzką historię. Osobiście straciłem dwie babci i mojego ojca podczas pandemii, a ranking pokazuje, że mój kraj, Polska, był jednym z najgorszych. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił w wielu aspektach planowania i na przykład wydał 600 mln złotych na niepotrzebne tymczasowe szpitale, które nie były używane, a tylko 400 mln złotych na potrzebne usługi zdrowotne (NIK 2023). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a to nie zmieniło się zbytnio w ostatnich latach. Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas przyszłej pandemii i przyszłych wyborów.
-##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska, Rumunia i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w okresie 2020-2022. Z drugiej strony rankingu znajdują się: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%. Wiele pytań wymaga odpowiedzi: czy lockdowny, ograniczenia w przemieszczaniu się i gromadzeniu były właściwą decyzją, jaki wpływ miały szczepienia na nadmiar zgonów, jaką rolę odegrała geografia, nasza kultura i zaufanie do wyników, czego nie mogą nam powiedzieć statystyki... i dlaczego Szwecja, dzięki swojej kontrowersyjnej i liberalnej strategii, wygrała?
+Długotrwałe skutki pandemii na statystyki nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, pokazuje jak dobrze poradziliśmy sobie z pandemią, i decyzje nasze i naszych rządów wpłynęły na życie naszych rodzin i społeczeństw. Ranking pokazuje, że Polska, była jednym z najgorszych miejsc do życia w czasie pandemii. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił w wielu aspektach planowania i na przykład wydał 600 mln złotych na niepotrzebne tymczasowe szpitale, które nie były używane, a tylko 400 mln złotych na potrzebne usługi zdrowotne (NIK 2023). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a to nie zmieniło się zbytnio w ostatnich latach. Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas przyszłej pandemii i przyszłych wyborów.
+
+##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska, Rumunia i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w okresie 2020-2022. Zwycięzcami rankingu są: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%. Zebrane dane mogą pomóc odpowiedzieć na takie pytania jak: czy lockdowny, ograniczenia w przemieszczaniu się i gromadzeniu były właściwą decyzją, jaki wpływ miały szczepienia na nadmiar zgonów, jaką rolę odegrała geografia, nasza kultura i zaufanie do wyników, czego nie mogą nam powiedzieć statystyki... i dlaczego Szwecja, dzięki swojej kontrowersyjnej i liberalnej strategii, wygrała?
+
 '''
+
 
 intro_markdown_text2 = '''
 ---
@@ -488,14 +506,14 @@ message_excess_deaths_text = html.Div([
 what_if_deaths, excess_deaths_in_selected_country = get_what_if_deaths(covid2, default_country,
                                                                        country_to_compare='Sweden')
 
-message_excess_deaths = f"Gdyby {default_country} miała taki sam odsetek nadmiernych zgonów procentowo jak Szwecja (najlepsza w Europie), straciłoby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}."
+message_excess_deaths = f"Gdyby analizowany tu kraj miał taki sam odsetek nadmiernych zgonów w % co Szwecja (najlepsza w Europie), straciłby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}."
 
 message_what_if_deaths = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="message_what_if_deaths"),
 ])
 
-weekly_charts_text = '''
-Odkryj, jak przebiegała pandemia koronawirusa na tygodniowej zasadzie w wybranym kraju.
+weekly_charts_text = f'''
+Odkryj, jak przebiegała pandemia koronawirusa w wybranym kraju:
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
@@ -518,7 +536,7 @@ Wykresy i mapy zostały stworzone na podstawie następujących źródeł danych:
 - Statystyki personelu medycznego - lekarze [Eurostat-3](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_physicians#Healthcare_personnel)
 - Statystyki personelu medycznego - pielęgniarki i opiekunowie [Eurostat-4](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_nursing_and_caring_professionals#Healthcare_personnel_.E2.80.93_nurses)
 - Statystyki zasobów opieki zdrowotnej - łóżka [Eurostat-5](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_resource_statistics_-_beds#Hospital_beds)
-- Tymczasowe szpitale COVID-19 [NIK](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
+- 14 zbędnych szpitali tymczasowych za ponad 600 mln zł [NIK](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
 
 Obrazy związane z opieką zdrowotną [projektowane przez macrovector / Freepik](http://www.freepik.com)
 
@@ -618,10 +636,10 @@ def update_bar_chart(country):
     what_if_deaths, excess_deaths_in_selected_country = get_what_if_deaths(covid2, country,
                                                                            country_to_compare='Sweden')
     if (country == 'Sweden'):
-        message_what_if_deaths = (f"Gdyby {country} miał ten sam procent nadmiernych zgonów co Bułgaria (najgorsza w Europie), "
-                                  f"straciłby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}.")
+        message_what_if_deaths = (f"Gdyby Szwecja miała ten sam procent nadmiernych zgonów co Bułgaria (najgorsza w Europie), "
+                                  f"straciłaby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}.")
     else:
-        message_what_if_deaths = (f"Gdyby {country} miał ten sam procent nadmiernych zgonów co Szwecja (najlepsza w Europie), "
+        message_what_if_deaths = (f"Gdyby analizowany kraj miał ten sam procent nadmiernych zgonów co Szwecja (najlepsza w Europie), "
                                   f"straciłby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}.")
 
     weekly_charts_fig = df_visualization_weekly_short(df_weekly, country=country)
