@@ -42,11 +42,10 @@ sparkline_annotation_text_color = "#1ea226"
 sparkline_arrow_color = "#1ea226"
 plotly_template = "plotly_white"
 
-######## app start
+# app start
 app = Dash(__name__, external_stylesheets=[my_dbc_style],
            meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
 server = app.server
-
 
 ############data############:
 
@@ -161,7 +160,10 @@ def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, l
                   annotation_font=dict(size=17))
 
     fig.update_layout(title_text=f"excess deaths in {country}", title_font_size=17, title_x=0.5, title_y=0.9,
-                      legend=dict(orientation="h"))  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
+                      legend=dict(orientation="h"), )  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
+    # set this: layout.xaxis.fixedrange: true
+    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(fixedrange=True)
 
     # fig.write_html("test.html", auto_open=True)
     return fig
@@ -203,9 +205,12 @@ def create_covid_excess_deaths(covid2):
         ),
     )
 
+
     fig.update_coloraxes(showscale=False)
 
     fig.update_layout(showlegend=False, )
+    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(fixedrange=True)
     return fig, title
 
 
@@ -251,10 +256,10 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
 
     fig.update_yaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90)
 
     fig.update_layout(height=700,
@@ -321,10 +326,10 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
         row += 1
 
     # fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
-    fig.update_yaxes(visible=False, showticklabels=True)
+    fig.update_yaxes(visible=False, showticklabels=True, fixedrange=True)
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%b-%Y", tickangle=90, tickmode='linear', )
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
     fig.update_xaxes(range=[pd.to_datetime('2020-01-01'), pd.to_datetime('2022-12-31')])
@@ -446,8 +451,13 @@ dropdown_country = dcc.Dropdown(
 
 covid_ranking_fig, covid_ranking_title = create_covid_excess_deaths(covid2)
 covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
-                          style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
-                          config={'staticPlot': True})
+                          config={'staticPlot': False,
+                                'modeBarButtonsToRemove': ['zoom', 'pan'],
+                                'scrollZoom': False,
+                                'doubleClick': False,
+                                  'showAxisDragHandles': False,
+'displayModeBar': True
+                                  })
 
 # header_map_fig = render_image_map()
 # header_map = dcc.Graph(id='header_map', figure=header_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
@@ -485,7 +495,7 @@ excess_deaths_chart_fig.update_layout(plot_bgcolor=colors['background'], paper_b
                                       font_color=colors['text'])
 
 excess_deaths_explanation = dcc.Graph(id='excess_deaths_explanation_graph', figure=excess_deaths_chart_fig,
-                                      config={'staticPlot': True})
+                                      config={'staticPlot': False, 'scrollZoom': False,})
 
 message_excess_deaths_text = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="excess_deaths_message"),
@@ -505,10 +515,10 @@ Explore how coronavirus pandemic unfolded on weekly basis in the selected countr
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
-weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': True})
+weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': False, 'scrollZoom': False})
 
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
-polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': True})
+polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': False, 'scrollZoom': False})
 
 healthcare_rankings = create_healthcare_rankings('Poland')
 
@@ -536,7 +546,6 @@ Broaden your knowledge here:
 - [9 mld złotych na dodatki covidowe – poza kontrolą Ministra Zdrowia i NFZ (in Polish)](https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)
 '''
 
-dbc.Row(dbc.Col(html.Div("A single column"))),
 ############ layout ############
 app.layout = html.Div(style={
     'max-width': '90%',
@@ -544,63 +553,72 @@ app.layout = html.Div(style={
 },
 
     children=[
-        html.Div([
-            # Header image with markdown text
-            html.Img(src=header_image_link,
-                     style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin': '0% auto'},
-                     title="excess deaths map"
-                     ),
-        ]),
-        html.Div([
-            dcc.Markdown(children=header_markdown_text, style={'max-width': '50%', }, id="header_markdown_text"),
-        ]),
-        # add thick red seperator line in color of danger
-        html.Div(style={'background-color': '#e8393f', 'height': '10px', 'width': '100%'}),
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Img(src=header_image_link,
+                             style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin': '0% auto'},
+                             title="excess deaths map"
+                             ), ]),
+            ], xs=12, sm=12, md=12, lg=12, xl=12)  # col
+        ], justify="center"),  # row
 
-        html.Div([
-            dcc.Markdown(children=intro_markdown_text),
-        ]),
+        dbc.Row([
+            dbc.Col([
+                # my app here:
+                html.Div([
+                    dcc.Markdown(children=header_markdown_text, style={'max-width': '50%', },
+                                 id="header_markdown_text"),
+                ]),
+                # add thick red seperator line in color of danger
+                html.Div(style={'background-color': '#e8393f', 'height': '10px', }),  # 'width': '100%'
 
-        # excess_deaths_map,
-        covid_ranking,
+                html.Div([
+                    dcc.Markdown(children=intro_markdown_text),
+                ]),
 
-        html.Div([
-            dcc.Markdown(children=intro_markdown_text2),
-        ]),
-        dropdown_country,
+                # excess_deaths_map,
+                covid_ranking,
 
-        message_excess_deaths_text,
-        message_what_if_deaths,
-        excess_deaths_explanation,
-        weekly_charts_intro,
-        weekly_charts,
-        polices_charts,
-        create_healthcare_rankings(),
-        # add a div with dbc button to redirect to another website:
-        html.Div([
-            # dcc.Markdown(children='''---'''),
-            html.Div([dbc.Button("Explore excess deaths interactive map (opens in new tab)", color="danger",
-                                 href="https://www.games4earth.com/excess-deaths-map", target="_blank")
-                      ]),
-        ]),
+                html.Div([
+                    dcc.Markdown(children=intro_markdown_text2),
+                ]),
 
-        html.Div([dcc.Markdown(children='''---'''),
-                  dbc.Button("back to top", color="warning",
-                             href="#dropdown", external_link=False,
-                             style={'padding': '5px 5px 5px 5px'})
-                  #     ,
-                  # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
-                  ]),
+         # for row
 
-        html.Div([
-            dcc.Markdown(children=ending_markdown_text),
-        ]),
+                dropdown_country,
 
-    ]
+                message_excess_deaths_text,
+                message_what_if_deaths,
+                excess_deaths_explanation,
+                weekly_charts_intro,
+                weekly_charts,
+                polices_charts,
+                create_healthcare_rankings(),
+                # add a div with dbc button to redirect to another website:
+                html.Div([
+                    # dcc.Markdown(children='''---'''),
+                    html.Div([dbc.Button("Explore excess deaths interactive map (opens in new tab)", color="danger",
+                                         href="https://www.games4earth.com/excess-deaths-map", target="_blank")
+                              ]),
+                ]),
+
+                html.Div([dcc.Markdown(children='''---'''),
+                          dbc.Button("back to top", color="warning",
+                                     href="#dropdown", external_link=False,
+                                     style={'padding': '5px 5px 5px 5px'})
+                          #     ,
+                          # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
+                          ]),
+
+                html.Div([
+                    dcc.Markdown(children=ending_markdown_text),
+                ]),
+                # my app layout ends here
+            ], xs=10, sm=10, md=5, lg=7, xl=6) #col
+        ], justify="center") #row
+]
 )
-# dbc.Row(dbc.Col(
-# )
-# )
 
 
 ########## callbacks ##########
