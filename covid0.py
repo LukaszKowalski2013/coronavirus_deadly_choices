@@ -345,88 +345,97 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
 
 
 def create_healthcare_rankings(country='Poland'):
-    df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
-    intro_text = f'''#####  Following data represents a state of healthcare system in {country} among other countries in this ranking:'''
-    ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
-    money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
-    money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
-    money_text = f"Healthcare expenditure in 2020 in euro (per inhabitant): {country} has {ranks_money}/28 place in ranking. In 2020 it spent {money_data} euro per inhabitant ({money_old_data} in 2012)."
 
-    dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
-    dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    dr_text = f"Practising physicians in 2021 (per 100K inhabitants): {country} has {rank_dr20}/28 place in ranking. In 2021 it had {dr20} physicians per 100K inhabitant ({dr16} in 2016)."
-
-    nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
-    nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    if country == 'Poland':
-        nurses_text = f"Practising nurses in 2017 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2017 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015). Note: Eurostat has data for Poland only for 2017, while for other countries for 2020."
+    if (country=='Luxembourg'):
+        intro_text = 'Unfortunatelly Luksemburg was not included in this additional ranking of healthcare system, because there was no full dataset about it.'
+        healthcare_rankings = html.Div([
+            html.Div([dcc.Markdown(children=['''---''', intro_text]),
+                      ])], id='healthcare_rankings')
+        return healthcare_rankings
     else:
-        nurses_text = f"Practising nurses in 2020 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2020 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015)."
 
-    beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
-    beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    beds_text = f"Curative care beds in hospitals in 2019 (per 100K inhabitants): {country} has {rank_beds19}/28 place in ranking. In 2019 it had {beds19} beds per 100K inhabitant ({beds09} in 2009)."
+        df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
+        intro_text = f'''#####  Following data represents a state of healthcare system in {country} among other countries in this ranking (without Luxemburg):'''
+        ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+        money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+        money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
+        money_text = f"Healthcare expenditure in 2020 in euro (per inhabitant): {country} has {ranks_money}/28 place in ranking. In 2020 it spent {money_data} euro per inhabitant ({money_old_data} in 2012)."
 
-    if country == 'Poland':
-        temporary_beds = '''###### Moreover, according to Supreme Audit Office: "Temporary hospitals in Poland were built in Poland since October 2020 on a scale unseen in Europe, without any plan or reliable analysis of the epidemiological situation or availability of medical staff, and also without any cost calculation – NIK established. According to the Polish SAI over PLN 612.6 million was spent ineffectively and without purpose on the creation, functioning and liquidation of temporary hospitals located in large-format buildings." [NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)'''
-    else:
-        temporary_beds = ''
+        dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
+        dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+        rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+        dr_text = f"Practising physicians in 2021 (per 100K inhabitants): {country} has {rank_dr20}/28 place in ranking. In 2021 it had {dr20} physicians per 100K inhabitant ({dr16} in 2016)."
 
-    healthcare_rankings = html.Div([
-        html.Div([dcc.Markdown(children=['''---''', intro_text]),
-                  ]),
+        nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
+        nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+        rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+        if country == 'Poland':
+            nurses_text = f"Practising nurses in 2017 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2017 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015). Note: Eurostat has data for Poland only for 2017, while for other countries for 2020."
+        else:
+            nurses_text = f"Practising nurses in 2020 (per 100K inhabitants): {country} has {rank_nurses20}/28 place in ranking. In 2020 it had {nurses20} nurses per 100K inhabitant ({nurses15} in 2015)."
 
-        html.Div([
+        beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
+        beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+        rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+        beds_text = f"Curative care beds in hospitals in 2019 (per 100K inhabitants): {country} has {rank_beds19}/28 place in ranking. In 2019 it had {beds19} beds per 100K inhabitant ({beds09} in 2009)."
+
+        if country == 'Poland':
+            temporary_beds = '''###### Moreover, according to Supreme Audit Office: "Temporary hospitals in Poland were built in Poland since October 2020 on a scale unseen in Europe, without any plan or reliable analysis of the epidemiological situation or availability of medical staff, and also without any cost calculation – NIK established. According to the Polish SAI over PLN 612.6 million was spent ineffectively and without purpose on the creation, functioning and liquidation of temporary hospitals located in large-format buildings." [NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)'''
+        else:
+            temporary_beds = ''
+
+        healthcare_rankings = html.Div([
+            html.Div([dcc.Markdown(children=['''---''', intro_text]),
+                      ]),
+
             html.Div([
-                html.Img(src=icons_money,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px'}),
-                dcc.Markdown(children=money_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_money,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px'}),
+                    dcc.Markdown(children=money_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_dr,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=dr_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_dr,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=dr_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_nurse,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=nurses_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_nurse,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=nurses_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_beds,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=beds_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_beds,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=beds_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
-            dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
-        ]),
+            html.Div([
+                dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
+            ]),
 
-        html.Div([
-            # Header image with markdown text
-            dcc.Markdown(
-                children=['''Note: Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)''']),
-        ]),
+            html.Div([
+                # Header image with markdown text
+                dcc.Markdown(
+                    children=['''Note: Healthcare images [designed by macrovector / Freepik](http://www.freepik.com)''']),
+            ]),
 
-    ], id='healthcare_rankings')
-    return healthcare_rankings
+        ], id='healthcare_rankings')
+        return healthcare_rankings
 
 
 ############ layout elements ############
@@ -617,7 +626,7 @@ app.layout = html.Div(style={
                     dcc.Markdown(children=ending_markdown_text),
                 ]),
                 # my app layout ends here
-            ], xs=12, sm=11, md=5, lg=7, xl=6) #col
+            ], xs=11, sm=11, md=5, lg=7, xl=6) #col
         ], justify="center") #row
 ]
 )

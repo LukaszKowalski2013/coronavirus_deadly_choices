@@ -80,6 +80,7 @@ def get_country_in_Polish(country):
 
     return my_dict[country]
 
+
 def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     expected_deaths = covid_df.loc[covid_df['country'] == country, 'expected deaths (2020-2022)'].values[0]
     excess_deaths = covid_df.loc[covid_df['country'] == country, 'excess deaths (2020-2022)'].values[0]
@@ -88,7 +89,7 @@ def get_what_if_deaths(covid_df, country, country_to_compare='Sweden'):
     what_if_deaths = (expected_deaths * excess_deaths_what_if_prc / 100) / 1000
     what_if_deaths = what_if_deaths.round(0).astype(int)
     excess_deaths_in_K = (excess_deaths / 1000).round(0).astype(int)
-    return f"{what_if_deaths}K", f"{excess_deaths_in_K}K"
+    return f"{what_if_deaths} tys.", f"{excess_deaths_in_K} tys."
 
 
 def get_official_covid_deaths_by_country(covid_deaths_df):
@@ -110,6 +111,7 @@ def get_official_covid_deaths_by_country(covid_deaths_df):
 
 # template='plotly'; line_color='black'; colors=("#656565", "#4b4b4b", "#a31212"); country='Poland'
 def create_what_if_deaths_explanation(dfy, country='Poland'):
+    # country_en = get_country_in_English(country)
     dfy = dfy.loc[dfy.country == country].copy()
     # only data > 2016 <= 2019
     dfy = dfy.loc[(dfy.year <= 2022) & (dfy.year >= 2016)]
@@ -130,15 +132,15 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
     df['deaths_diff'] = df['deaths'] - df['official Covid deaths']
 
     df = df.loc[df.country == country]
-    total_excess_deaths = df.loc[df['description'] == 'excess deaths (above 2016-2019 average)'].sum()['deaths']
-    total_official_covid_deaths = df.loc[df['description'] == 'excess deaths (above 2016-2019 average)'].sum()[
+    total_excess_deaths = df.loc[df['description'] == 'nadwyżka zgonów (powyżej średniej 2016-2019)'].sum()['deaths']
+    total_official_covid_deaths = df.loc[df['description'] == 'nadwyżka zgonów (powyżej średniej 2016-2019)'].sum()[
         'official Covid deaths']
     links = '<a href="https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/">Eurostat</a>, ' \
             '<a href="https://github.com/owid/covid-19-data/">JHU CSSE/Our World in Data</a>'
 
     datasource_note = f"data sources/read more: {links}"
     if total_excess_deaths > total_official_covid_deaths:
-        lower_higher = f"Nadwyżka zgonów była {total_excess_deaths / total_official_covid_deaths:.2f} razy wyższa niż oczekiwano."
+        lower_higher = f" Nadwyżka zgonów była {total_excess_deaths / total_official_covid_deaths:.2f} razy wyższa niż można by było oczekiwać na podstawie oficjalnych danych covidowych."
     else:
         lower_higher = f""
 
@@ -153,7 +155,10 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
 def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, line_color=what_if_average_color,
                                colors=what_if_colors):
     fig = px.bar(df, x='year', y='deaths',
-                 hover_data=['description', 'deaths'], color='description',
+                 hover_data=['description', 'deaths'],
+                 color='description',
+                 #change description of hover_data
+                    hover_name='description',
                  color_discrete_sequence=colors,  # labels={'pop':'population of Canada'},
                  template=template, height=523)
 
@@ -166,7 +171,8 @@ def create_what_if_deaths_plot(df, country='Poland', template=plotly_template, l
                       #hide legend title
                         legend_title_text='',
                       )  # , y=-0.3)) #, margin=dict(l=50, r=50, b=150, t=150, pad=4),)
-
+    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(fixedrange=True)
     # fig.write_html("test.html", auto_open=True)
     return fig
 
@@ -181,15 +187,15 @@ def create_covid_excess_deaths(covid2):
                  y="ranking_pl",
                  color='excess deaths in % (2020-2022)',
                  color_continuous_scale='Viridis_r',  # 'Inferno_r', color_discrete_sequence=colors, #["#a31212"],
-                 hover_data={'country': False,
-                             'deaths (2020-2022)': ':,',  # ':.1f', 'deaths (2016-2019)': '.1f',
-                             'average deaths (2016-2019)': ':,',  # '.1f',
-                             'expected deaths (2020-2022)': ':,',  # '.1f',
-                             'excess deaths (2020-2022)': ':,',  # '.1f',
-                             'excess deaths in % (2020-2022)': True,  # '.1f',
-                             # 'what if deaths': ':,', # '.1f',
-                             'ranking': False,  #
-                             },
+                 # hover_data={'country': False,
+                 #             'deaths (2020-2022)': ':,',  # ':.1f', 'deaths (2016-2019)': '.1f',
+                 #             'average deaths (2016-2019)': ':,',  # '.1f',
+                 #             'expected deaths (2020-2022)': ':,',  # '.1f',
+                 #             'excess deaths (2020-2022)': ':,',  # '.1f',
+                 #             'excess deaths in % (2020-2022)': True,  # '.1f',
+                 #             # 'what if deaths': ':,', # '.1f',
+                 #             'ranking': False,  #
+                 #             },
                  hover_name='ranking_pl',
                  orientation='h',
                  # custom title for x axis:
@@ -214,6 +220,8 @@ def create_covid_excess_deaths(covid2):
     fig.update_coloraxes(showscale=False)
 
     fig.update_layout(showlegend=False, )
+    fig.update_xaxes(fixedrange=True)
+    fig.update_yaxes(fixedrange=True)
     return fig, title
 
 
@@ -258,10 +266,10 @@ def df_visualization_weekly_short(df_weekly, country='Poland'):
 
     fig.update_yaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90)
 
     fig.update_layout(height=700,
@@ -331,10 +339,10 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
         row += 1
 
     # fig.update_layout(plot_bgcolor='rgba(0,0,0,0)')
-    fig.update_yaxes(visible=False, showticklabels=True)
+    fig.update_yaxes(visible=False, showticklabels=True, fixedrange=True)
     fig.update_xaxes(showline=False, linewidth=1, linecolor=almost_black, mirror=True,
                      tickfont=dict(color=tickfont_color),
-                     showgrid=False)
+                     showgrid=False, fixedrange=True)
     fig.update_xaxes(tick0=0, dtick=3 * 30 * 24 * 60 * 60 * 1000, tickformat="%m-%Y", tickangle=90, tickmode='linear')
 
     # set start date to 1-Jan-2020 and end date to 31-Dec-2022 for x axis for all subplots
@@ -351,88 +359,94 @@ def create_covid_policy_sparklines_for_country_subset(df, country, color=sparkli
 
 def create_healthcare_rankings(country='Poland'):
     pl_country = get_country_in_Polish(country)
-    
-    df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
-    intro_text = f'''##### {pl_country}. Poniższe dane przedstawiają stan systemu opieki zdrowotnej w porównaniu do innych krajów w tym rankingu:'''
-    ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
-    money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
-    money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
-    money_text = f"**Wydatki na opiekę zdrowotną w 2020 roku w euro (na mieszkańca):** {pl_country} - {ranks_money}/28 miejsce w rankingu. W 2020 roku wydano {money_data} euro na mieszkańca ({money_old_data} w 2012 roku)."
-    dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
-    dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
-    dr_text = f"**Lekarze praktykujący w 2021 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_dr20}/28 miejsce w rankingu. W 2021 roku miało {dr20} lekarzy na 100 tys. mieszkańców ({dr16} w 2016 roku)."
-
-    nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
-    nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
-    if country == 'Poland':
-        nurses_text = f"**Pielęgniarki praktykujące w 2017 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2017 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku). Nota: Eurostat ma dane tylko dla Polski z roku 2017, podczas gdy dla innych krajów z roku 2020."
+    if (country=='Luxembourg'):
+        intro_text = 'Niestety Luksemburg nie został uwzlędniony w dodatkowym rankingu systemu opieki zdrowotnej, bo nie było dla niego kompletnych danych.'
+        healthcare_rankings = html.Div([
+            html.Div([dcc.Markdown(children=['''---''', intro_text]),
+                      ])], id='healthcare_rankings')
+        return healthcare_rankings
     else:
-        nurses_text = f"**Pielęgniarki praktykujące w 2020 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2020 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku)."
+        df = my_eurostat_healthcare_ranking.loc[my_eurostat_healthcare_ranking['country'] == country].copy()
+        intro_text = f'''##### {pl_country}. Poniższe dane przedstawiają stan systemu opieki zdrowotnej wybranego kraju w porównaniu do innych krajów w tym rankingu (bez Luksemburga):'''
+        ranks_money = df['rank_healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+        money_data = df['healthcare expenditure in 2020 in euro (per inhabitant)'].values[0]
+        money_old_data = df['healthcare expenditure in 2012 in euro (per inhabitant)'].values[0]
+        money_text = f"**Wydatki na opiekę zdrowotną w 2020 roku w euro (na mieszkańca):** {pl_country} - {ranks_money}/28 miejsce w rankingu. W 2020 roku wydano {money_data} euro na mieszkańca ({money_old_data} w 2012 roku)."
+        dr16 = df['Practising physicians in 2016 (per 100 000 inhabitants)'].values[0]
+        dr20 = df['Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+        rank_dr20 = df['rank_Practising physicians in 2021 (per 100 000 inhabitants)'].values[0]
+        dr_text = f"**Lekarze praktykujący w 2021 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_dr20}/28 miejsce w rankingu. W 2021 roku miało {dr20} lekarzy na 100 tys. mieszkańców ({dr16} w 2016 roku)."
 
-    beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
-    beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
-    beds_text = f"**Łóżka w szpitalach w 2019 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_beds19}/28 miejsce w rankingu. W 2019 roku miało {beds19} łóżek na 100 tys. mieszkańców ({beds09} w 2009 roku)."
+        nurses15 = df['Practising nurses in 2015 (per 100 000 inhabitants)'].values[0]
+        nurses20 = df['Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+        rank_nurses20 = df['rank_Practising nurses in 2020 (per 100 000 inhabitants)'].values[0]
+        if country == 'Poland':
+            nurses_text = f"**Pielęgniarki praktykujące w 2017 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2017 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku). Nota: Eurostat ma dane tylko dla Polski z roku 2017, podczas gdy dla innych krajów z roku 2020."
+        else:
+            nurses_text = f"**Pielęgniarki praktykujące w 2020 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_nurses20}/28 miejsce w rankingu. W 2020 roku miało {nurses20} pielęgniarek na 100 tys. mieszkańców ({nurses15} w 2015 roku)."
 
-    if country == 'Poland':
-        temporary_beds = "###### Ponadto, według Najwyższej Izby Kontroli: 'Szpitale tymczasowe dla chorych na COVID-19 tworzone w Polsce od października 2020 r. na niespotykaną w Europie skalę, powstawały bez żadnego planu, bez rzetelnej analizy danych o sytuacji epidemicznej i dostępności kadr medycznych, a także bez kalkulacji kosztów (...). W efekcie od marca 2020 r. do kwietnia 2022 r. koszty utrzymania gotowości do udzielania świadczeń pacjentom z COVID-19 we wszystkich przystosowanych do tego szpitalach wyniosły ok. 7 mld zł, podczas gdy w tym samym okresie, na faktyczne leczenie pacjentów zakażonych wirusem SARS-COV2 państwo wydało niecałe 5 mld zł.' NIK"
-    else:
-        temporary_beds = ''
+        beds09 = df['Curative care beds in hospitals in 2009 (per 100 000 inhabitants)'].values[0]
+        beds19 = df['Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+        rank_beds19 = df['rank_Curative care beds in hospitals in 2019 (per 100 000 inhabitants)'].values[0]
+        beds_text = f"**Łóżka w szpitalach w 2019 roku (na 100 tys. mieszkańców):** {pl_country} - {rank_beds19}/28 miejsce w rankingu. W 2019 roku miało {beds19} łóżek na 100 tys. mieszkańców ({beds09} w 2009 roku)."
 
-    healthcare_rankings = html.Div([
-        html.Div([dcc.Markdown(children=['''---''', intro_text]),
-                  ]),
+        if country == 'Poland':
+            temporary_beds = ("###### Ponadto, według Najwyższej Izby Kontroli w polski rząd zawinił w wielu aspektach planowania i na przykład: wydał ponad 600 milionów złotych na niepotrzebne tymczasowe szpitale ([NIK 2023 -1](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)), 7 miliardów zł na utrzymanie szpitali w gotowości dla przyszłych pacjentów z koronawirusem, a tylko 5 miliardów na faktyczne leczenie pacjentów z koronawirusem, 9 miliardów na dodatki covidowe poza kontrolą Ministra Zdrowia i NFZ ([NIK 2023 -2](https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)) i  85 milionów zł na „respiratory – za drogie, niekompletne, niesprawne lub nie spełniające polskich normom” ([NIK 2023 -3](https://www.nik.gov.pl/aktualnosci/covid-19-w-polsce.html)). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a to nie zmieniło się zbytnio w ostatnich latach.")
+        else:
+            temporary_beds = ''
 
-        html.Div([
+        healthcare_rankings = html.Div([
+            html.Div([dcc.Markdown(children=['''---''', intro_text]),
+                      ]),
+
             html.Div([
-                html.Img(src=icons_money,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px'}),
-                dcc.Markdown(children=money_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_money,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px'}),
+                    dcc.Markdown(children=money_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_dr,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=dr_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_dr,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=dr_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_nurse,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=nurses_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_nurse,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=nurses_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
             html.Div([
-                html.Img(src=icons_beds,
-                         style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
-                                'padding': '5px 5px 5px 5px', }),
-                dcc.Markdown(children=beds_text, style={'display': 'inline-block'}),
+                html.Div([
+                    html.Img(src=icons_beds,
+                             style={'max-width': '113px', 'height': 'auto', 'display': 'inline-block',
+                                    'padding': '5px 5px 5px 5px', }),
+                    dcc.Markdown(children=beds_text, style={'display': 'inline-block'}),
+                ]),
             ]),
-        ]),
 
-        html.Div([
-            dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
-        ]),
+            html.Div([
+                dcc.Markdown(children=temporary_beds, style={'display': 'inline-block'}),
+            ]),
 
-        html.Div([
-            # Header image with markdown text
-            dcc.Markdown(
-                children=['''Nota: Obrazy opieki zdrowotnej [zaprojektowane przez macrovector / Freepik](http://www.freepik.com)''']),
-        ]),
+            html.Div([
+                # Header image with markdown text
+                dcc.Markdown(
+                    children=['''Nota: Obrazy opieki zdrowotnej [zaprojektowane przez macrovector / Freepik](http://www.freepik.com)''']),
+            ]),
 
-    ], id='healthcare_rankings')
-    return healthcare_rankings
+        ], id='healthcare_rankings')
+        return healthcare_rankings
 
 
 ############ layout elements ############
@@ -459,8 +473,14 @@ dropdown_country = dcc.Dropdown(
 
 covid_ranking_fig, covid_ranking_title = create_covid_excess_deaths(covid2)
 covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
-                          style={'width': '99%', 'height': '99%', 'display': 'inline-block'},
-                          config={'staticPlot': True})
+                          # style={'width': '99%', 'height': '99%', 'display': 'inline-block'}, #it crushes whole app if there are rows and cols
+                          config={'staticPlot': False,
+                                  'modeBarButtonsToRemove': ['zoom', 'pan'],
+                                  'scrollZoom': False,
+                                  'doubleClick': False,
+                                  'showAxisDragHandles': False,
+                                  'displayModeBar': True
+                                  })
 
 # header_map_fig = render_image_map()
 # header_map = dcc.Graph(id='header_map', figure=header_map_fig, style={'width': '99%', 'height': '99%', 'display': 'inline-block'})
@@ -474,12 +494,20 @@ covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
 header_markdown_text = '''# Śmiertelne wybory - koronawirusowy ranking
 '''
 
-intro_markdown_text = '''Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie innych ludzi i że wszyscy jesteśmy ze sobą powiązani. Poniższa analiza i ranking opierają się na statystyce nadmiernych zgonów w % wszystkich zgonów, ponieważ dla porównań międzynarodowych jest to najbardziej wiarygodna i rzetelna statystyka opisująca śmiertelność podczas pandemii koronawirusa (Eurostat 2023; link poniżej). Nadmiar zgonów oznacza tutaj zgony (niezależnie od przyczyn) w okresie COVID-19 powyżej średniej zgonów przed pandemią (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w okresie 2016-2019. Ten miernik jest znacznie bardziej rzetelny do porównań międzynarodowych niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony koronawirusowe (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. pacjent mógł unikać pewnych diagnoz, szpitale nie przyjmowały tylu pacjentów co zwykle).
+intro_markdown_text = '''
 
-Długotrwałe skutki pandemii na statystyki nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, pokazuje jak dobrze poradziliśmy sobie z pandemią, i decyzje nasze i naszych rządów wpłynęły na życie naszych rodzin i społeczeństw. Ranking pokazuje, że Polska, była jednym z najgorszych miejsc do życia w czasie pandemii. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił w wielu aspektach planowania i na przykład wydał 600 mln złotych na niepotrzebne tymczasowe szpitale, które nie były używane, a tylko 400 mln złotych na potrzebne usługi zdrowotne (NIK 2023). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a to nie zmieniło się zbytnio w ostatnich latach. Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas przyszłej pandemii i przyszłych wyborów.
+Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie i śmierć innych ludzi. Wszyscy jesteśmy ze sobą powiązani. Żyjemy w systemie zależności, który w skali naszego regionu, kraju, Europy jest zróżnicowany geograficznie i dynamiczny. Poniższa analiza i ranking opierają się na statystyce nadmiernych zgonów w % wszystkich zgonów, ponieważ dla porównań międzynarodowych jest to najbardziej wiarygodna i rzetelna statystyka opisująca śmiertelność podczas pandemii koronawirusa (Eurostat 2023; wszystkie linki źródłowe poniżej). Jest to szczególnie ważne w kontekście zbliżających się wyborów, które w Polsce odbędą się w niedzielę, 15 października 2023 r. 
 
-##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska, Rumunia i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w okresie 2020-2022. Zwycięzcami rankingu są: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%. Zebrane dane mogą pomóc odpowiedzieć na takie pytania jak: czy lockdowny, ograniczenia w przemieszczaniu się i gromadzeniu były właściwą decyzją, jaki wpływ miały szczepienia na nadmiar zgonów, jaką rolę odegrała geografia, nasza kultura i zaufanie do wyników, czego nie mogą nam powiedzieć statystyki... i dlaczego Szwecja, dzięki swojej kontrowersyjnej i liberalnej strategii, wygrała?
+W Polsce podczas pandemii, za rządów Prawa i Sprawiedliwości (oraz m.in. Solidarnej Polski i Polski Razem) zginęło 232 tysięcy osób więcej niż zwykle (19,5% więcej). Jesteśmy pod tym względem najgorsi w Europie razem z Bułgarią, Słowacją i Cyprem.
 
+Nadmiar zgonów oznacza tutaj zgony (niezależnie od przyczyn) w okresie COVID-19 (2020-2022) powyżej średniej zgonów przed pandemią (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w okresie 2016-2019. Ten miernik jest znacznie bardziej rzetelny do porównań międzynarodowych niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony koronawirusowe (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. pacjent mógł uać pewnych diagnoz, szpitale nie przyjmowały tylu pacjentów co zwykle).
+
+Długotrwałe skutki pandemii na statystykę nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, pokazuje jak źle poradziliśmy sobie z pandemią na tle Europy, i jak decyzje nasze i naszych rządów wpłynęły na życie naszych rodzin i społeczeństw. Pod kątem nadmiaru zgonów Polska była jednym z najgorszych miejsc do życia w czasie pandemii. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił wówczas w wielu aspektach planowania i gospodarności naszych pieniędzy (szczegóły poniżej). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a w ostatnich latach nasza pozycja w tym wyścigu nie uległa znaczącej zmianie.
+
+Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas przyszłej pandemii i najbliższych wyborów.
+
+##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w okresie 2020-2022. Zwycięzcami rankingu są: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%. 
+Poniższe dane opowiadają historię trzech lat. Poza zróżnicowaniem geograficznym, które obrazują, mogą pomóc Wam odpowiedzieć na takie pytania jak: czy lockdowny, ograniczenia w przemieszczaniu się i gromadzeniu były właściwą decyzją, jaki wpływ miały szczepienia na nadmiar zgonów i dlaczego Szwecja, dzięki swojej kontrowersyjnej i liberalnej strategii, wygrała? W pewnym miejscu liczby i statystyki się kończą i zacierają - nie pokazują naszej kultury, zaufania, stanu zdrowia, samotności ludzi umierających w szpitalach, ani tego czego sami doświadczyliśmy.
 '''
 
 
@@ -497,7 +525,7 @@ excess_deaths_chart_fig.update_layout(plot_bgcolor=colors['background'], paper_b
                                       font_color=colors['text'])
 
 excess_deaths_explanation = dcc.Graph(id='excess_deaths_explanation_graph', figure=excess_deaths_chart_fig,
-                                      config={'staticPlot': True})
+                                      config={'staticPlot': False, 'scrollZoom': False,})
 
 message_excess_deaths_text = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="excess_deaths_message"),
@@ -506,7 +534,7 @@ message_excess_deaths_text = html.Div([
 what_if_deaths, excess_deaths_in_selected_country = get_what_if_deaths(covid2, default_country,
                                                                        country_to_compare='Sweden')
 
-message_excess_deaths = f"Gdyby analizowany tu kraj miał taki sam odsetek nadmiernych zgonów w % co Szwecja (najlepsza w Europie), straciłby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}."
+message_excess_deaths = f"Gdyby analizowany tu kraj miał taki sam odsetek nadmiernych zgonów w % co Szwecja (najlepsza w Europie), straciłby {what_if_deaths} osób, a nie {excess_deaths_in_selected_country}"
 
 message_what_if_deaths = html.Div([
     dcc.Markdown(children=message_excess_deaths, id="message_what_if_deaths"),
@@ -517,16 +545,16 @@ Odkryj, jak przebiegała pandemia koronawirusa w wybranym kraju:
 '''
 weekly_charts_intro = dcc.Markdown(children=weekly_charts_text, id="weekly_charts_intro")
 weekly_charts_fig = df_visualization_weekly_short(df_weekly, country='Poland')
-weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': True})
+weekly_charts = dcc.Graph(id='weekly_charts', figure=weekly_charts_fig, config={'staticPlot': False, 'scrollZoom': False})
 
 polices_fig = create_covid_policy_sparklines_for_country_subset(polices, country='Poland')
-polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': True})
+polices_charts = dcc.Graph(id='polices_charts', figure=polices_fig, config={'staticPlot': False, 'scrollZoom': False})
 
 healthcare_rankings = create_healthcare_rankings('Poland')
 
 ending_markdown_text = '''
 ---
-Wykresy i mapy zostały stworzone na podstawie następujących źródeł danych:
+Wykresy, mapy i tekst zostały stworzone na podstawie następujących źródeł danych:
 - Nadmiar zgonów został oszacowany na podstawie danych Eurostat dotyczących tygodniowych zgonów [Eurostat-1](https://data.europa.eu/data/datasets/whum2ir8f4kymrrkj1srq?locale=en)
 - Potwierdzone tygodniowe przypadki i zgony (wykres) [JHU CSSE/Our World in Data](https://github.com/CSSEGISandData/COVID-19)
 - Tempo szczepień [Our World in Data](https://github.com/owid/covid-19-data)
@@ -536,16 +564,17 @@ Wykresy i mapy zostały stworzone na podstawie następujących źródeł danych:
 - Statystyki personelu medycznego - lekarze [Eurostat-3](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_physicians#Healthcare_personnel)
 - Statystyki personelu medycznego - pielęgniarki i opiekunowie [Eurostat-4](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_personnel_statistics_-_nursing_and_caring_professionals#Healthcare_personnel_.E2.80.93_nurses)
 - Statystyki zasobów opieki zdrowotnej - łóżka [Eurostat-5](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Healthcare_resource_statistics_-_beds#Hospital_beds)
-- 14 zbędnych szpitali tymczasowych za ponad 600 mln zł [NIK](https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
+- 14 zbędnych szpitali tymczasowych za ponad 600 mln zł - [NIK 2023 -1] (https://www.nik.gov.pl/aktualnosci/14-zbednych-szpitali-tymczasowych.html)
+- 9 mld złotych na dodatki covidowe – poza kontrolą Ministra Zdrowia i NFZ [NIK 2023 -2] (https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)
+- COVID-19 w Polsce – na początku był chaos [NIK 2023 -3](https://www.nik.gov.pl/aktualnosci/covid-19-w-polsce.html)
 
 Obrazy związane z opieką zdrowotną [projektowane przez macrovector / Freepik](http://www.freepik.com)
 
 Poszerz swoją wiedzę tutaj:
 - [Artykuł Eurostatu o nadmiarze zgonów w UE między 2020 a 2023 rokiem](https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Excess_mortality_-_statistics#Excess_mortality_in_the_EU_between_January_2020_and_May_2023/)
-- [Nieskuteczne zarządzanie pandemią COVID-19 w Polsce - konferencja prasowa w NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)
+- [Ineffective management of the COVID-19 pandemic in Poland - press conference at NIK](https://www.nik.gov.pl/en/news/ineffective-management-of-the-covid-19-pandemic-in-poland-press-conference-at-nik.html)
 - Thomas Hale, Noam Angrist, Rafael Goldszmidt, Beatriz Kira, Anna Petherick, Toby Phillips, Samuel Webster, Emily Cameron-Blake, Laura Hallas, Saptarshi Majumdar, and Helen Tatlow. (2021). “A global panel database of pandemic policies (Oxford COVID-19 Government Response Tracker).” Nature Human Behaviour. https://doi.org/10.1038/s41562-021-01079-8
-- [COVID-19 w Polsce – na początku był chaos](https://www.nik.gov.pl/aktualnosci/covid-19-w-polsce.html)
-- [9 mld złotych na dodatki covidowe – poza kontrolą Ministra Zdrowia i NFZ](https://www.nik.gov.pl/aktualnosci/9-mld-zlotych-na-dodatki-covidowe.html)
+
 ---
 '''
 
@@ -553,67 +582,71 @@ Poszerz swoją wiedzę tutaj:
 app.layout = html.Div(
     style={
     'max-width': '90%',
-    'margin': '10% 10% 10% 10%', #explain numbers: top, right, bottom, left
-    'padding': '20px 20px 20px 20px',
+    'margin': '5% auto',
 },
 
     children=[
-        html.Div(
-        [
-            # Header image with markdown text
-            html.Img(src=header_image_link,
-                     style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin': '0%'},
-                     title="mapa nadwyżki zgonów w Europie"
-                     ),
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.Img(src=header_image_link,
+                             style={'width': '100%', 'height': 'auto', 'max-width': '100%', 'margin': '0% auto'},
+                             title="excess deaths map"
+                             ), ]),
+            ], xs=12, sm=12, md=12, lg=12, xl=12)  # col
+        ], justify="center"),  # row
 
-        ]),
-        html.Div([
-            dcc.Markdown(children=header_markdown_text, style={'max-width': '50%', }, id="header_markdown_text"),
-        ]),
-        # add thick red seperator line in color of danger
-        html.Div(style={'background-color': '#e8393f', 'height': '10px', 'width': '100%'}),
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    dcc.Markdown(children=header_markdown_text, style={'max-width': '50%', },
+                                 id="header_markdown_text"),
+                ]),
+                # add thick red seperator line in color of danger
+                html.Div(style={'background-color': '#e8393f', 'height': '10px', 'width': '100%'}),
 
-        html.Div([
-            dcc.Markdown(children=intro_markdown_text),
-        ]),
+                html.Div([
+                    dcc.Markdown(children=intro_markdown_text),
+                ]),
 
-        # excess_deaths_map,
-        covid_ranking,
+                # excess_deaths_map,
+                covid_ranking,
 
-        html.Div([
-            dcc.Markdown(children=intro_markdown_text2),
-        ]),
-        dropdown_country,
+                html.Div([
+                    dcc.Markdown(children=intro_markdown_text2),
+                ]),
+                dropdown_country,
 
-        message_excess_deaths_text,
-        message_what_if_deaths,
-        excess_deaths_explanation,
-        weekly_charts_intro,
-        weekly_charts,
-        polices_charts,
-        create_healthcare_rankings(),
-        # add a div with dbc button to redirect to another website:
-        html.Div([
-            # dcc.Markdown(children='''---'''),
-            html.Div([dbc.Button("Interaktywna mapa nadwyżkowych zgonów (otwiera się w nowym tabie)", color="danger",
-                                 href="https://www.games4earth.com/excess-deaths-map", target="_blank")
-                      ]),
-        ]),
+                message_excess_deaths_text,
+                message_what_if_deaths,
+                excess_deaths_explanation,
+                weekly_charts_intro,
+                weekly_charts,
+                polices_charts,
+                create_healthcare_rankings(),
+                # add a div with dbc button to redirect to another website:
+                html.Div([
+                    # dcc.Markdown(children='''---'''),
+                    html.Div([dbc.Button("Interaktywna mapa nadwyżkowych zgonów (otwiera się w nowej zakładce)",
+                                         color="danger",
+                                         href="https://www.games4earth.com/excess-deaths-map", target="_blank")
+                              ]),
+                ]),
 
-        html.Div([dcc.Markdown(children='''---'''),
-                  dbc.Button("back to top", color="warning",
-                             href="#dropdown", external_link=False,
-                             style={'padding': '5px 5px 5px 5px'})
-                  #     ,
-                  # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
-                  ]),
+                html.Div([dcc.Markdown(children='''---'''),
+                          dbc.Button("powrót na górę strony", color="warning",
+                                     href="#dropdown", external_link=False,
+                                     style={'padding': '5px 5px 5px 5px'})
+                          #     ,
+                          # dbc.NavItem(dbc.NavLink("A link", href="#dropdown")),
+                          ]),
 
-        html.Div([
-            dcc.Markdown(children=ending_markdown_text),
-        ]),
-
+                html.Div([
+                    dcc.Markdown(children=ending_markdown_text),
+                ]),
+                ], xs=11, sm=10, md=5, lg=7, xl=6) #col
+        ], justify="center"), #row
     ]
-
 )
 
 
