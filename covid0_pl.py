@@ -152,7 +152,7 @@ def create_what_if_deaths_explanation(dfy, country='Poland'):
         lower_higher = f""
 
     message = (f"Nadwyżka zgonów w tym kraju wyniosła: {(total_excess_deaths / 1000).round(0).astype(int)} tys. "
-               f"podczas pandemi Covid-19 (2020-2022) w porównaniu z poprzednimi latami, "
+               f"podczas pandemii Covid-19 (2020-2022) w porównaniu z poprzednimi latami, "
                f"z czego tylko {(total_official_covid_deaths / 1000).round(0).astype(int)} tys. zostało oficjalnie "
                f"przypisanych koronawirusowi.") + lower_higher
 
@@ -497,7 +497,6 @@ covid_ranking = dcc.Graph(id='covid_ranking', figure=covid_ranking_fig,
 #     html.Img(src='data:image/png;base64,{}'.format(encoded_image))
 # ])
 
-
 # website layout
 # markdown text with thick red seperator line
 header_markdown_text = '''# Śmiertelne wybory - koronawirusowy ranking
@@ -505,17 +504,17 @@ header_markdown_text = '''# Śmiertelne wybory - koronawirusowy ranking
 
 intro_markdown_text = '''
 
-Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie i śmierć innych ludzi. Wszyscy jesteśmy ze sobą powiązani. Żyjemy w systemie zależności, który w skali naszego regionu, kraju, Europy jest zróżnicowany geograficznie i dynamiczny. Poniższa analiza i ranking opierają się na statystyce nadmiernych zgonów w % wszystkich zgonów, ponieważ dla porównań międzynarodowych jest to najbardziej wiarygodna i rzetelna statystyka opisująca śmiertelność podczas pandemii koronawirusa (Eurostat 2023; wszystkie linki źródłowe poniżej). Jest to szczególnie ważne w kontekście zbliżających się wyborów, które w Polsce odbędą się w niedzielę, 15 października 2023 r. 
+Podczas pandemii stało się jasne, że nasze decyzje wpływają na życie i śmierć innych ludzi. Wszyscy jesteśmy ze sobą powiązani. Żyjemy w systemie zależności, który w skali naszego regionu, kraju, Europy jest zróżnicowany geograficznie i dynamiczny. Poniższa analiza i ranking opierają się na wskaźniku nadmiernych zgonów w % wszystkich zgonów, ponieważ dla porównań międzynarodowych jest to najbardziej wiarygodny i rzetelny miernik opisujący śmiertelność podczas pandemii koronawirusa (Eurostat 2023; wszystkie linki źródłowe poniżej). Jest to szczególnie ważne w kontekście zbliżających się wyborów, które w Polsce odbędą się w niedzielę, 15 października 2023 r.
 
-W Polsce podczas pandemii, za rządów Prawa i Sprawiedliwości (oraz m.in. Solidarnej Polski i Polski Razem) zginęło 232 tysięcy osób więcej niż zwykle (19,5% więcej). Jesteśmy pod tym względem najgorsi w Europie razem z Bułgarią, Słowacją i Cyprem.
+W Polsce podczas pandemii, za rządów Prawa i Sprawiedliwości (oraz m.in. Solidarnej Polski i Polski Razem) umarło 232 tysięcy osób więcej niż zwykle (19,5% więcej). Zajmujemy pod tym względem pierwsze miejsce w Europie razem z Bułgarią, Słowacją i Cyprem.
 
-Nadmiar zgonów oznacza tutaj zgony (niezależnie od przyczyn) w okresie COVID-19 (2020-2022) powyżej średniej zgonów przed pandemią (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w okresie 2016-2019. Ten miernik jest znacznie bardziej rzetelny do porównań międzynarodowych niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony koronawirusowe (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. szpitale nie przyjmowały tylu pacjentów co zwykle, pacjenci czekali dłużej na wyniki badań i diagnostykę).
+Wskaźnik nadmiaru zgonów oznacza tutaj zgony (niezależnie od przyczyn) w okresie COVID-19 (2020-2022) powyżej średniej zgonów przed pandemią (2016-2019). Im wyższa wartość, tym więcej dodatkowych zgonów. Jeśli wartość jest ujemna, oznacza to, że zmarło mniej osób niż w okresie 2016-2019. Ten miernik jest znacznie bardziej rzetelny do porównań międzynarodowych niż oficjalnie przypisywane koronawirusowi zgony z wielu powodów: szpitale różnie zgłaszały zgony koronawirusowe (mogły istnieć zachęty do zaklasyfikowania kogoś jako "pacjenta covidowego"), wirus mógł być jedną z wielu przyczyn zgonu lub zgon mógł być związany z ograniczeniami w danym kraju (np. szpitale nie przyjmowały tylu pacjentów co zwykle, pacjenci czekali dłużej na wyniki badań i diagnostykę).
 
-Długotrwałe skutki pandemii na statystykę nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, pokazuje jak źle poradziliśmy sobie z pandemią na tle Europy, i jak decyzje nasze i naszych rządów wpłynęły na życie naszych rodzin i społeczeństw. Pod kątem nadmiaru zgonów Polska była jednym z najgorszych miejsc do życia w czasie pandemii. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił wówczas w wielu aspektach planowania i gospodarności naszych pieniędzy (szczegóły poniżej). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a w ostatnich latach nasza pozycja w tym wyścigu nie uległa znaczącej zmianie.
+Długotrwałe skutki pandemii na wartość współczynnika nadmiernych zgonów są jeszcze nieznane, ale ranking, który stworzyłem, pokazuje jak źle poradziliśmy sobie z pandemią na tle Europy, i jak decyzje nasze i naszych rządów wpłynęły na życie naszych rodzin i społeczeństw. Pod względem liczby zgonów Polska zajmowała jedno z pierwszych miejsc w Europie. Ponadto, według Najwyższej Izby Kontroli w Polsce rząd zawinił wówczas w wielu aspektach planowania i gospodarności naszych pieniędzy (szczegóły poniżej). Powody naszej porażki sięgają jednak znacznie głębiej - Polska ma jedne z najgorszych statystyk zdrowotnych w Europie, a w ostatnich latach nasza pozycja w tym wyścigu nie uległa znaczącej zmianie.
 
-Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas przyszłej pandemii i najbliższych wyborów.
+Mam nadzieję, że ten ranking pomoże nam podejmować właściwe decyzje podczas najbliższych wyborów.
 
-##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w okresie 2020-2022. Zwycięzcami rankingu są: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%. 
+##### Ranking koronawirusa: najgorszymi krajami do życia podczas pandemii koronawirusa były Bułgaria, Cypr, Polska i Słowacja - odnotowano tam ponad 19% nadmiernych zgonów w latach 2020-2022. Zwycięzcami rankingu są: Dania, Finlandia, Islandia, Norwegia i Szwecja, gdzie nadmiar zgonów wyniósł mniej niż 7%.
 '''
 
 text_additional_polish = '''
